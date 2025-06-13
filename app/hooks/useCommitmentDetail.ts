@@ -53,21 +53,23 @@ export function useCommitmentDetail(id: string | undefined) {
     updateCommitment(updatedCommitment)
     setCommitment(updatedCommitment)
   }
-
   const handleAddTask = async () => {
     if (!commitment) return
 
     const newTaskTitle = await showTextModal('Enter task title:', 'Task title')
     if (!newTaskTitle) return
 
-    // Use date modal with today's date as default
+    // Use date modal with today's date as default, but allow cancellation
     const today = new Date().toISOString().split('T')[0]
-    const dueDateStr = await showDateModal('Select due date:', today)
+    const dueDateStr = await showDateModal(
+      'Select due date (optional - click Cancel for no due date):',
+      today,
+    )
 
     const newTask: Task = {
       id: `task-${Date.now()}`,
       title: newTaskTitle,
-      dueAt: dueDateStr ? new Date(dueDateStr) : new Date(),
+      dueAt: dueDateStr ? new Date(dueDateStr) : null,
       completed: false,
     }
 

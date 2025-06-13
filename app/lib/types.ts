@@ -1,7 +1,7 @@
 export type Task = {
   id: string
   title: string
-  dueAt: Date
+  dueAt?: Date | null
   completed: boolean
 }
 

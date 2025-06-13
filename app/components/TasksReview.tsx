@@ -50,10 +50,12 @@ const TasksReview: React.FC<TasksReviewProps> = ({
                 >
                   {task.title}
                 </span>
-              </div>
-              <div className='text-xs text-gray-500 dark:text-gray-400'>
-                Due: {new Date(task.dueAt).toLocaleDateString()}
-              </div>
+              </div>{' '}
+              {task.dueAt && (
+                <div className='text-xs text-gray-500 dark:text-gray-400'>
+                  Due: {new Date(task.dueAt).toLocaleDateString()}
+                </div>
+              )}
             </li>
           ))}
         </ul>
