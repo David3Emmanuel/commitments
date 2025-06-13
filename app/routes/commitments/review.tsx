@@ -105,6 +105,55 @@ export default function ReviewCommitment() {
     }))
   }
 
+  const handleEditTask = (taskId: string) => {
+    if (!commitment) return
+
+    const task = commitment.subItems.tasks.find((t) => t.id === taskId)
+    if (!task) return
+
+    const newTitle = prompt('Edit task title:', task.title)
+    if (!newTitle || newTitle === task.title) return // No change
+
+    // Update the task in our commitment
+    const updatedTasks = commitment.subItems.tasks.map((t) =>
+      t.id === taskId ? { ...t, title: newTitle } : t,
+    )
+
+    // Update the commitment state
+    setCommitment({
+      ...commitment,
+      subItems: {
+        ...commitment.subItems,
+        tasks: updatedTasks,
+      },
+    })
+  }
+
+  const handleDeleteTask = (taskId: string) => {
+    if (!commitment) return
+
+    // Remove the task from the list
+    const updatedTasks = commitment.subItems.tasks.filter(
+      (task) => task.id !== taskId,
+    )
+
+    // Update the commitment state
+    setCommitment({
+      ...commitment,
+      subItems: {
+        ...commitment.subItems,
+        tasks: updatedTasks,
+      },
+    })
+
+    // Also remove from task completion status
+    setTaskCompletionStatus((prev) => {
+      const updated = { ...prev }
+      delete updated[taskId]
+      return updated
+    })
+  }
+
   const handleHabitToggle = (habitId: string) => {
     setHabitCheckIns((prev) => ({
       ...prev,
@@ -248,6 +297,8 @@ export default function ReviewCommitment() {
               tasks={commitment.subItems.tasks}
               taskCompletionStatus={taskCompletionStatus}
               handleTaskToggle={handleTaskToggle}
+              handleEditTask={handleEditTask}
+              handleDeleteTask={handleDeleteTask}
             />
           )}
           {currentStep === 'habits' && (

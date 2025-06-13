@@ -28,6 +28,8 @@ export default function CommitmentDetail() {
     handleAddHabit,
     handleAddNote,
     handleArchiveToggle,
+    handleEditTask,
+    handleDeleteTask,
   } = useCommitmentDetail(id)
   if (isLoading) {
     return (
@@ -81,12 +83,14 @@ export default function CommitmentDetail() {
               commitment={commitment}
               formatDate={formatDate}
             />
-          )}
+          )}{' '}
           {activeTab === 'tasks' && (
             <CommitmentTasks
               tasks={commitment.subItems.tasks}
               onTaskToggle={handleTaskToggle}
               onAddTask={handleAddTask}
+              onEditTask={handleEditTask}
+              onDeleteTask={handleDeleteTask}
             />
           )}
           {activeTab === 'habits' && (

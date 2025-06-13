@@ -6,12 +6,16 @@ interface CommitmentTasksProps {
   tasks: Task[]
   onTaskToggle: (taskId: string) => void
   onAddTask: () => void
+  onEditTask: (taskId: string) => void
+  onDeleteTask: (taskId: string) => void
 }
 
 export default function CommitmentTasks({
   tasks,
   onTaskToggle,
   onAddTask,
+  onEditTask,
+  onDeleteTask,
 }: CommitmentTasksProps) {
   return (
     <div className='space-y-6'>
@@ -39,10 +43,15 @@ export default function CommitmentTasks({
           }
         >
           Add Task
-        </Button>
+        </Button>{' '}
       </div>
 
-      <TaskList tasks={tasks} onTaskToggle={onTaskToggle} />
+      <TaskList
+        tasks={tasks}
+        onTaskToggle={onTaskToggle}
+        onEditTask={onEditTask}
+        onDeleteTask={onDeleteTask}
+      />
     </div>
   )
 }

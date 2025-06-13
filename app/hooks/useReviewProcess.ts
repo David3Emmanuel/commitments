@@ -50,6 +50,66 @@ export function useReviewProcess(commitmentId: string) {
     }))
   }
 
+  const handleEditTask = (taskId: string) => {
+    if (!commitment) return
+
+    const task = commitment.subItems.tasks.find((t) => t.id === taskId)
+    if (!task) return
+
+    // Keep the current task in state and update the list
+    const updatedTasks = commitment.subItems.tasks.map((t) =>
+      t.id === taskId
+        ? { ...t, title: prompt('Edit task title:', t.title) || t.title }
+        : t,
+    )
+
+    // Update the local commitment state
+    const updatedCommitment = {
+      ...commitment,
+      subItems: {
+        ...commitment.subItems,
+        tasks: updatedTasks,
+      },
+    }
+
+    setCommitment(updatedCommitment)
+
+    // Also update the task completion status if needed
+    setTaskCompletionStatus((prev) => ({
+      ...prev,
+      [taskId]: taskCompletionStatus[taskId] || false,
+    }))
+  }
+
+  const handleDeleteTask = (taskId: string) => {
+    if (!commitment) return
+
+    if (!confirm('Are you sure you want to delete this task?')) return
+
+    // Remove the task from the list
+    const updatedTasks = commitment.subItems.tasks.filter(
+      (task) => task.id !== taskId,
+    )
+
+    // Update the local commitment state
+    const updatedCommitment = {
+      ...commitment,
+      subItems: {
+        ...commitment.subItems,
+        tasks: updatedTasks,
+      },
+    }
+
+    setCommitment(updatedCommitment)
+
+    // Also remove from task completion status
+    setTaskCompletionStatus((prev) => {
+      const updated = { ...prev }
+      delete updated[taskId]
+      return updated
+    })
+  }
+
   const handleHabitToggle = (habitId: string) => {
     setHabitCheckIns((prev) => ({
       ...prev,
@@ -138,6 +198,8 @@ export function useReviewProcess(commitmentId: string) {
     noteContent,
     setNoteContent,
     handleTaskToggle,
+    handleEditTask,
+    handleDeleteTask,
     handleHabitToggle,
     handleNextStep,
     cancelReview,

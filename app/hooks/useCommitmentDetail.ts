@@ -53,6 +53,71 @@ export function useCommitmentDetail(id: string | undefined) {
     updateCommitment(updatedCommitment)
     setCommitment(updatedCommitment)
   }
+
+  const handleEditTask = async (taskId: string) => {
+    if (!commitment) return
+
+    const task = commitment.subItems.tasks.find((t) => t.id === taskId)
+    if (!task) return
+
+    const editedTaskTitle = await showTextModal(
+      'Edit task title:',
+      'Task title',
+      task.title,
+    )
+    if (!editedTaskTitle) return
+
+    // Use date modal with current date as default, or keep existing date
+    const currentDueDate = task.dueAt
+      ? new Date(task.dueAt).toISOString().split('T')[0]
+      : new Date().toISOString().split('T')[0]
+
+    const dueDateStr = await showDateModal(
+      'Select due date (optional - click Cancel for no due date):',
+      currentDueDate,
+    )
+
+    const updatedTasks = commitment.subItems.tasks.map((t) =>
+      t.id === taskId
+        ? {
+            ...t,
+            title: editedTaskTitle,
+            dueAt: dueDateStr ? new Date(dueDateStr) : null,
+          }
+        : t,
+    )
+
+    const updatedCommitment = {
+      ...commitment,
+      subItems: {
+        ...commitment.subItems,
+        tasks: updatedTasks,
+      },
+    }
+
+    updateCommitment(updatedCommitment)
+    setCommitment(updatedCommitment)
+  }
+
+  const handleDeleteTask = (taskId: string) => {
+    if (!commitment) return
+
+    const updatedTasks = commitment.subItems.tasks.filter(
+      (task) => task.id !== taskId,
+    )
+
+    const updatedCommitment = {
+      ...commitment,
+      subItems: {
+        ...commitment.subItems,
+        tasks: updatedTasks,
+      },
+    }
+
+    updateCommitment(updatedCommitment)
+    setCommitment(updatedCommitment)
+  }
+
   const handleAddTask = async () => {
     if (!commitment) return
 
@@ -172,5 +237,7 @@ export function useCommitmentDetail(id: string | undefined) {
     handleAddHabit,
     handleAddNote,
     handleArchiveToggle,
+    handleEditTask,
+    handleDeleteTask,
   }
 }
