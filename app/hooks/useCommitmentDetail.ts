@@ -6,7 +6,7 @@ import type { Commitment, Task, Habit } from '~/lib/types'
 export function useCommitmentDetail(id: string | undefined) {
   const [commitment, setCommitment] = useState<Commitment | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const { showModal } = useModal()
+  const { showTextModal, showDateModal, showDropdownModal } = useModal()
   const {
     getCommitment,
     updateCommitment,
@@ -48,16 +48,16 @@ export function useCommitmentDetail(id: string | undefined) {
     updateCommitment(updatedCommitment)
     setCommitment(updatedCommitment)
   }
+
   const handleAddTask = async () => {
     if (!commitment) return
 
-    const newTaskTitle = await showModal('Enter task title:', 'Task title')
+    const newTaskTitle = await showTextModal('Enter task title:', 'Task title')
     if (!newTaskTitle) return
 
-    const dueDateStr = await showModal(
-      'Enter due date (YYYY-MM-DD), leave empty for no due date:',
-      'YYYY-MM-DD',
-    )
+    // Use date modal with today's date as default
+    const today = new Date().toISOString().split('T')[0]
+    const dueDateStr = await showDateModal('Select due date:', today)
 
     const newTask: Task = {
       id: `task-${Date.now()}`,
@@ -77,18 +77,29 @@ export function useCommitmentDetail(id: string | undefined) {
     updateCommitment(updatedCommitment)
     setCommitment(updatedCommitment)
   }
+
   const handleAddHabit = async () => {
     if (!commitment) return
 
-    const newHabitTitle = await showModal('Enter habit title:', 'Habit title')
+    const newHabitTitle = await showTextModal(
+      'Enter habit title:',
+      'Habit title',
+    )
     if (!newHabitTitle) return
 
-    const scheduleOptions = ['daily', 'weekly', 'monthly']
-    const scheduleIndex = await showModal(
-      'Choose schedule type (enter number):\n1. Daily\n2. Weekly\n3. Monthly',
-      'Enter 1, 2, or 3',
+    const scheduleOptions = [
+      { value: 'daily', label: 'Daily' },
+      { value: 'weekly', label: 'Weekly' },
+      { value: 'monthly', label: 'Monthly' },
+    ]
+
+    const schedule = await showDropdownModal(
+      'Select habit frequency',
+      scheduleOptions,
+      'weekly',
     )
-    const schedule = scheduleOptions[Number(scheduleIndex) - 1] || 'weekly'
+
+    if (!schedule) return
 
     const newHabit: Habit = {
       id: `habit-${Date.now()}`,
@@ -108,10 +119,14 @@ export function useCommitmentDetail(id: string | undefined) {
     updateCommitment(updatedCommitment)
     setCommitment(updatedCommitment)
   }
+
   const handleAddNote = async () => {
     if (!commitment) return
 
-    const noteContent = await showModal('Enter note content:', 'Note content')
+    const noteContent = await showTextModal(
+      'Enter note content:',
+      'Note content',
+    )
     if (!noteContent) return
 
     const newNote = {

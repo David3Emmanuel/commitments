@@ -2,7 +2,9 @@ import React, { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import Button from './Button'
 import TextInput from './TextInput'
+import Select from './Select'
 
+// Modal prop types
 interface ModalProps {
   isOpen: boolean
   onClose: () => void
@@ -10,15 +12,58 @@ interface ModalProps {
   title?: string
 }
 
-interface ModalInputProps {
+// Common props for all modal input types
+interface BaseModalInputProps {
   title: string
-  placeholder?: string
-  initialValue?: string
-  onSubmit: (value: string) => void
   onCancel: () => void
 }
 
+// Text input modal props
+interface TextModalInputProps extends BaseModalInputProps {
+  type: 'text'
+  placeholder?: string
+  initialValue?: string
+  onSubmit: (value: string) => void
+}
+
+// Date input modal props
+interface DateModalInputProps extends BaseModalInputProps {
+  type: 'date'
+  initialValue?: string
+  onSubmit: (value: string) => void
+}
+
+// Dropdown modal props
+interface DropdownModalInputProps extends BaseModalInputProps {
+  type: 'dropdown'
+  options: { value: string; label: string }[]
+  initialValue?: string
+  onSubmit: (value: string) => void
+}
+
+// Union type of all modal input props
+type ModalInputProps =
+  | TextModalInputProps
+  | DateModalInputProps
+  | DropdownModalInputProps
+
+// Context for showing modals
 interface ModalContextType {
+  showTextModal: (
+    title: string,
+    placeholder?: string,
+    initialValue?: string,
+  ) => Promise<string | null>
+  showDateModal: (
+    title: string,
+    initialValue?: string,
+  ) => Promise<string | null>
+  showDropdownModal: (
+    title: string,
+    options: { value: string; label: string }[],
+    initialValue?: string,
+  ) => Promise<string | null>
+  // For backwards compatibility
   showModal: (
     title: string,
     placeholder?: string,
@@ -27,6 +72,9 @@ interface ModalContextType {
 }
 
 const ModalContext = React.createContext<ModalContextType>({
+  showTextModal: () => Promise.resolve(null),
+  showDateModal: () => Promise.resolve(null),
+  showDropdownModal: () => Promise.resolve(null),
   showModal: () => Promise.resolve(null),
 })
 
@@ -37,13 +85,14 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [modalProps, setModalProps] = useState<ModalInputProps | null>(null)
 
-  const showModal = (
+  const showTextModal = (
     title: string,
     placeholder?: string,
     initialValue?: string,
   ): Promise<string | null> => {
     return new Promise((resolve) => {
       setModalProps({
+        type: 'text',
         title,
         placeholder,
         initialValue,
@@ -59,8 +108,67 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({
     })
   }
 
+  const showDateModal = (
+    title: string,
+    initialValue?: string,
+  ): Promise<string | null> => {
+    return new Promise((resolve) => {
+      setModalProps({
+        type: 'date',
+        title,
+        initialValue,
+        onSubmit: (value) => {
+          setModalProps(null)
+          resolve(value)
+        },
+        onCancel: () => {
+          setModalProps(null)
+          resolve(null)
+        },
+      })
+    })
+  }
+
+  const showDropdownModal = (
+    title: string,
+    options: { value: string; label: string }[],
+    initialValue?: string,
+  ): Promise<string | null> => {
+    return new Promise((resolve) => {
+      setModalProps({
+        type: 'dropdown',
+        title,
+        options,
+        initialValue,
+        onSubmit: (value) => {
+          setModalProps(null)
+          resolve(value)
+        },
+        onCancel: () => {
+          setModalProps(null)
+          resolve(null)
+        },
+      })
+    })
+  }
+
+  // For backwards compatibility with existing code
+  const showModal = (
+    title: string,
+    placeholder?: string,
+    initialValue?: string,
+  ): Promise<string | null> => {
+    return showTextModal(title, placeholder, initialValue)
+  }
   return (
-    <ModalContext.Provider value={{ showModal }}>
+    <ModalContext.Provider
+      value={{
+        showTextModal,
+        showDateModal,
+        showDropdownModal,
+        showModal,
+      }}
+    >
       {children}
       {modalProps &&
         typeof document !== 'undefined' &&
@@ -188,7 +296,7 @@ export const Modal: React.FC<ModalProps> = ({
   )
 }
 
-const ModalInput: React.FC<ModalInputProps> = ({
+const TextModalInput: React.FC<TextModalInputProps> = ({
   title,
   placeholder,
   initialValue = '',
@@ -238,6 +346,111 @@ const ModalInput: React.FC<ModalInputProps> = ({
       </form>
     </Modal>
   )
+}
+
+const DateModalInput: React.FC<DateModalInputProps> = ({
+  title,
+  initialValue = '',
+  onSubmit,
+  onCancel,
+}) => {
+  const [value, setValue] = useState(initialValue)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    onSubmit(value)
+  }
+
+  // Focus the input when the modal opens
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus()
+    }
+  }, [])
+
+  return (
+    <Modal isOpen={true} onClose={onCancel} title={title}>
+      <form onSubmit={handleSubmit} className='space-y-4'>
+        <TextInput
+          ref={inputRef}
+          type='date'
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          className='w-full'
+          autoFocus
+          aria-label='Date input'
+        />
+        <div className='flex justify-end gap-3 mt-6'>
+          <Button
+            variant='secondary'
+            type='button'
+            onClick={onCancel}
+            className='px-4 py-2'
+          >
+            Cancel
+          </Button>
+          <Button type='submit' className='px-4 py-2'>
+            Submit
+          </Button>
+        </div>
+      </form>
+    </Modal>
+  )
+}
+
+const DropdownModalInput: React.FC<DropdownModalInputProps> = ({
+  title,
+  options,
+  initialValue = '',
+  onSubmit,
+  onCancel,
+}) => {
+  const [value, setValue] = useState(initialValue)
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    onSubmit(value)
+  }
+
+  return (
+    <Modal isOpen={true} onClose={onCancel} title={title}>
+      <form onSubmit={handleSubmit} className='space-y-4'>
+        <Select
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          className='w-full'
+          options={options}
+          autoFocus
+        />
+        <div className='flex justify-end gap-3 mt-6'>
+          <Button
+            variant='secondary'
+            type='button'
+            onClick={onCancel}
+            className='px-4 py-2'
+          >
+            Cancel
+          </Button>
+          <Button type='submit' className='px-4 py-2'>
+            Submit
+          </Button>
+        </div>
+      </form>
+    </Modal>
+  )
+}
+
+// Unified modal input component that renders the appropriate modal type
+const ModalInput: React.FC<ModalInputProps> = (props) => {
+  switch (props.type) {
+    case 'text':
+      return <TextModalInput {...props} />
+    case 'date':
+      return <DateModalInput {...props} />
+    case 'dropdown':
+      return <DropdownModalInput {...props} />
+  }
 }
 
 export default Modal
