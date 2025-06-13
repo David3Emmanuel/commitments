@@ -1,6 +1,6 @@
 import React from 'react'
 
-type ButtonVariant = 'primary' | 'secondary' | 'link'
+type ButtonVariant = 'primary' | 'secondary' | 'link' | 'danger'
 type ButtonSize = 'sm' | 'md' | 'lg'
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -8,7 +8,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   size?: ButtonSize
   icon?: React.ReactNode
   fullWidth?: boolean
-  children: React.ReactNode
+  children?: React.ReactNode
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -22,13 +22,14 @@ const Button: React.FC<ButtonProps> = ({
 }) => {
   const baseStyles =
     'flex items-center rounded-md focus:outline-none transition-colors'
-
   const variantStyles = {
     primary:
       'bg-blue-600 text-white hover:bg-blue-700 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500',
     secondary:
       'border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700',
     link: 'text-gray-600 hover:text-blue-600 transition-colors',
+    danger:
+      'bg-red-600 text-white hover:bg-red-700 focus:ring-2 focus:ring-offset-2 focus:ring-red-500',
   }
 
   const sizeStyles = {
