@@ -20,7 +20,8 @@ const Button: React.FC<ButtonProps> = ({
   className = '',
   ...props
 }) => {
-  const baseStyles = 'rounded-md focus:outline-none transition-colors'
+  const baseStyles =
+    'flex items-center rounded-md focus:outline-none transition-colors'
 
   const variantStyles = {
     primary:
