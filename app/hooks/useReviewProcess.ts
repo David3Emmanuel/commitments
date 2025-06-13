@@ -2,15 +2,19 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router'
 import { useCommitments } from '~/contexts/CommitmentContext'
 import type { Commitment, Task, Habit } from '~/lib/types'
+import { useModal } from '~/components/ui/Modal'
 
 type ReviewStep = 'tasks' | 'habits' | 'notes' | 'complete'
 
 export function useReviewProcess(commitmentId: string) {
   const navigate = useNavigate()
   const { getCommitment, updateCommitment } = useCommitments()
+  const modal = useModal()
 
   const [currentStep, setCurrentStep] = useState<ReviewStep>('tasks')
   const [commitment, setCommitment] = useState<Commitment | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [taskCompletionStatus, setTaskCompletionStatus] = useState<
     Record<string, boolean>
   >({})
@@ -22,24 +26,36 @@ export function useReviewProcess(commitmentId: string) {
   useEffect(() => {
     if (!commitmentId) return
 
-    const loadedCommitment = getCommitment(commitmentId)
+    setIsLoading(true)
+    setError(null)
 
-    if (loadedCommitment) {
-      setCommitment(loadedCommitment)
+    try {
+      const loadedCommitment = getCommitment(commitmentId)
 
-      // Initialize task completion status from current tasks
-      const initialTaskStatus: Record<string, boolean> = {}
-      loadedCommitment.subItems.tasks.forEach((task) => {
-        initialTaskStatus[task.id] = task.completed
-      })
-      setTaskCompletionStatus(initialTaskStatus)
+      if (loadedCommitment) {
+        setCommitment(loadedCommitment)
 
-      // Initialize habit check-ins (all unselected initially)
-      const initialHabitStatus: Record<string, boolean> = {}
-      loadedCommitment.subItems.habits.forEach((habit) => {
-        initialHabitStatus[habit.id] = false
-      })
-      setHabitCheckIns(initialHabitStatus)
+        // Initialize task completion status from current tasks
+        const initialTaskStatus: Record<string, boolean> = {}
+        loadedCommitment.subItems.tasks.forEach((task) => {
+          initialTaskStatus[task.id] = task.completed
+        })
+        setTaskCompletionStatus(initialTaskStatus)
+
+        // Initialize habit check-ins (all unselected initially)
+        const initialHabitStatus: Record<string, boolean> = {}
+        loadedCommitment.subItems.habits.forEach((habit) => {
+          initialHabitStatus[habit.id] = false
+        })
+        setHabitCheckIns(initialHabitStatus)
+      } else {
+        setError('Commitment not found')
+      }
+    } catch (e) {
+      console.error('Failed to load commitment:', e)
+      setError('Failed to load commitment data')
+    } finally {
+      setIsLoading(false)
     }
   }, [commitmentId, getCommitment])
 
@@ -56,11 +72,12 @@ export function useReviewProcess(commitmentId: string) {
     const task = commitment.subItems.tasks.find((t) => t.id === taskId)
     if (!task) return
 
-    // Keep the current task in state and update the list
+    const newTitle = prompt('Edit task title:', task.title)
+    if (!newTitle || newTitle === task.title) return // No change
+
+    // Update the task in our commitment
     const updatedTasks = commitment.subItems.tasks.map((t) =>
-      t.id === taskId
-        ? { ...t, title: prompt('Edit task title:', t.title) || t.title }
-        : t,
+      t.id === taskId ? { ...t, title: newTitle } : t,
     )
 
     // Update the local commitment state
@@ -73,41 +90,46 @@ export function useReviewProcess(commitmentId: string) {
     }
 
     setCommitment(updatedCommitment)
-
-    // Also update the task completion status if needed
-    setTaskCompletionStatus((prev) => ({
-      ...prev,
-      [taskId]: taskCompletionStatus[taskId] || false,
-    }))
   }
 
   const handleDeleteTask = (taskId: string) => {
     if (!commitment) return
 
-    if (!confirm('Are you sure you want to delete this task?')) return
+    modal
+      .showConfirmModal(
+        'Delete Task',
+        'Are you sure you want to delete this task?',
+        'Delete',
+        'Cancel',
+      )
+      .then((confirmed) => {
+        if (!confirmed) return
 
-    // Remove the task from the list
-    const updatedTasks = commitment.subItems.tasks.filter(
-      (task) => task.id !== taskId,
-    )
+        if (!commitment) return
 
-    // Update the local commitment state
-    const updatedCommitment = {
-      ...commitment,
-      subItems: {
-        ...commitment.subItems,
-        tasks: updatedTasks,
-      },
-    }
+        // Remove the task from the list
+        const updatedTasks = commitment.subItems.tasks.filter(
+          (task) => task.id !== taskId,
+        )
 
-    setCommitment(updatedCommitment)
+        // Update the local commitment state
+        const updatedCommitment = {
+          ...commitment,
+          subItems: {
+            ...commitment.subItems,
+            tasks: updatedTasks,
+          },
+        }
 
-    // Also remove from task completion status
-    setTaskCompletionStatus((prev) => {
-      const updated = { ...prev }
-      delete updated[taskId]
-      return updated
-    })
+        setCommitment(updatedCommitment)
+
+        // Also remove from task completion status
+        setTaskCompletionStatus((prev) => {
+          const updated = { ...prev }
+          delete updated[taskId]
+          return updated
+        })
+      })
   }
 
   const handleHabitToggle = (habitId: string) => {
@@ -121,68 +143,62 @@ export function useReviewProcess(commitmentId: string) {
     if (!commitment) return
 
     if (currentStep === 'tasks') {
-      // Save task completion state
-      const updatedTasks = commitment.subItems.tasks.map((task) => ({
-        ...task,
-        completed: taskCompletionStatus[task.id] || false,
-      }))
-
-      const updatedCommitment = {
-        ...commitment,
-        subItems: {
-          ...commitment.subItems,
-          tasks: updatedTasks,
-        },
-      }
-
-      setCommitment(updatedCommitment)
       setCurrentStep('habits')
     } else if (currentStep === 'habits') {
-      // Update habit history for checked habits
-      const updatedHabits = commitment.subItems.habits.map((habit) => {
-        if (habitCheckIns[habit.id]) {
-          return {
-            ...habit,
-            history: [...habit.history, new Date()],
-          }
-        }
-        return habit
-      })
-
-      const updatedCommitment = {
-        ...commitment,
-        subItems: {
-          ...commitment.subItems,
-          habits: updatedHabits,
-        },
-      }
-
-      setCommitment(updatedCommitment)
       setCurrentStep('notes')
     } else if (currentStep === 'notes') {
-      // Add new note if content was entered
-      let updatedNotes = [...commitment.notes]
-      if (noteContent.trim()) {
-        updatedNotes = [
-          ...commitment.notes,
-          {
-            id: `note-${Date.now()}`,
-            content: noteContent.trim(),
-            timestamp: new Date(),
-          },
-        ]
-      }
+      completeReview()
+    }
+  }
 
-      // Complete the review
-      const updatedCommitment = {
-        ...commitment,
-        notes: updatedNotes,
-        lastReviewedAt: new Date(),
-      }
+  const completeReview = () => {
+    if (!commitment) return
 
+    // Update tasks completion status
+    const updatedTasks = commitment.subItems.tasks.map((task) => ({
+      ...task,
+      completed: taskCompletionStatus[task.id] || false,
+    }))
+
+    // Update habit histories with check-ins
+    const updatedHabits = commitment.subItems.habits.map((habit) => {
+      if (habitCheckIns[habit.id]) {
+        return {
+          ...habit,
+          history: [...habit.history, new Date()],
+        }
+      }
+      return habit
+    })
+
+    // Create a new note if content is provided
+    const updatedNotes = [...commitment.notes]
+    if (noteContent.trim()) {
+      updatedNotes.push({
+        id: `note-${Date.now()}`,
+        content: noteContent.trim(),
+        timestamp: new Date(),
+      })
+    }
+
+    // Complete the review
+    const updatedCommitment = {
+      ...commitment,
+      lastReviewedAt: new Date(),
+      subItems: {
+        tasks: updatedTasks,
+        habits: updatedHabits,
+      },
+      notes: updatedNotes,
+    }
+
+    try {
       // Save the updated commitment
       updateCommitment(updatedCommitment)
       setCurrentStep('complete')
+    } catch (error) {
+      console.error('Failed to save review:', error)
+      setError('Failed to save review. Please try again.')
     }
   }
 
@@ -193,6 +209,8 @@ export function useReviewProcess(commitmentId: string) {
   return {
     currentStep,
     commitment,
+    isLoading,
+    error,
     taskCompletionStatus,
     habitCheckIns,
     noteContent,
