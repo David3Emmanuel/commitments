@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useCommitments } from '~/contexts/CommitmentContext'
+import { useModal } from '~/components/ui'
 import type { Commitment, Task, Habit } from '~/lib/types'
 
 export function useCommitmentDetail(id: string | undefined) {
   const [commitment, setCommitment] = useState<Commitment | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const { showModal } = useModal()
   const {
     getCommitment,
     updateCommitment,
@@ -46,15 +48,15 @@ export function useCommitmentDetail(id: string | undefined) {
     updateCommitment(updatedCommitment)
     setCommitment(updatedCommitment)
   }
-
-  const handleAddTask = () => {
+  const handleAddTask = async () => {
     if (!commitment) return
 
-    const newTaskTitle = prompt('Enter task title:')
+    const newTaskTitle = await showModal('Enter task title:', 'Task title')
     if (!newTaskTitle) return
 
-    const dueDateStr = prompt(
+    const dueDateStr = await showModal(
       'Enter due date (YYYY-MM-DD), leave empty for no due date:',
+      'YYYY-MM-DD',
     )
 
     const newTask: Task = {
@@ -75,16 +77,16 @@ export function useCommitmentDetail(id: string | undefined) {
     updateCommitment(updatedCommitment)
     setCommitment(updatedCommitment)
   }
-
-  const handleAddHabit = () => {
+  const handleAddHabit = async () => {
     if (!commitment) return
 
-    const newHabitTitle = prompt('Enter habit title:')
+    const newHabitTitle = await showModal('Enter habit title:', 'Habit title')
     if (!newHabitTitle) return
 
     const scheduleOptions = ['daily', 'weekly', 'monthly']
-    const scheduleIndex = prompt(
-      `Choose schedule type (enter number):\n1. Daily\n2. Weekly\n3. Monthly`,
+    const scheduleIndex = await showModal(
+      'Choose schedule type (enter number):\n1. Daily\n2. Weekly\n3. Monthly',
+      'Enter 1, 2, or 3',
     )
     const schedule = scheduleOptions[Number(scheduleIndex) - 1] || 'weekly'
 
@@ -106,11 +108,10 @@ export function useCommitmentDetail(id: string | undefined) {
     updateCommitment(updatedCommitment)
     setCommitment(updatedCommitment)
   }
-
-  const handleAddNote = () => {
+  const handleAddNote = async () => {
     if (!commitment) return
 
-    const noteContent = prompt('Enter note content:')
+    const noteContent = await showModal('Enter note content:', 'Note content')
     if (!noteContent) return
 
     const newNote = {

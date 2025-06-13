@@ -9,6 +9,8 @@ import {
 
 import type { Route } from './+types/root'
 import { CommitmentProvider } from './contexts/CommitmentContext'
+import { ToastProvider } from './components/ui/Toast'
+import { ModalProvider } from './components/ui/Modal'
 import './app.css'
 
 export const links: Route.LinksFunction = () => [
@@ -44,9 +46,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <CommitmentProvider>
-      <Outlet />
-    </CommitmentProvider>
+    <ToastProvider>
+      <ModalProvider>
+        <CommitmentProvider>
+          <Outlet />
+        </CommitmentProvider>
+      </ModalProvider>
+    </ToastProvider>
   )
 }
 

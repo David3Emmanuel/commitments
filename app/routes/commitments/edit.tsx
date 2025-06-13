@@ -10,11 +10,13 @@ import {
   Select,
   Card,
   CardContent,
+  useToast,
 } from '~/components/ui'
 
 export default function EditCommitment() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { showToast } = useToast()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [reviewType, setReviewType] = useState<'interval' | 'custom'>(
@@ -119,14 +121,13 @@ export default function EditCommitment() {
       commitments = commitments.map((c: Commitment) =>
         c.id === id ? updatedCommitment : c,
       )
-
       localStorage.setItem('commitments', JSON.stringify(commitments))
 
       // Navigate back to the commitment detail page
       navigate(`/commitments/${id}`)
     } catch (error) {
       console.error('Failed to save updated commitment:', error)
-      alert('Failed to save commitment. Please try again.')
+      showToast('Failed to save commitment. Please try again.', 'error')
     }
   }
 

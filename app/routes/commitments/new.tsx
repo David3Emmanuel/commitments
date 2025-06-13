@@ -10,6 +10,7 @@ import {
   Select,
   Card,
   CardContent,
+  useToast,
 } from '~/components/ui'
 
 export default function NewCommitment() {
@@ -21,6 +22,7 @@ export default function NewCommitment() {
   )
   const [intervalDays, setIntervalDays] = useState<number>(7)
   const [customCron, setCustomCron] = useState<string>('')
+  const { showToast } = useToast()
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -63,8 +65,8 @@ export default function NewCommitment() {
       navigate('/')
     } catch (error) {
       console.error('Failed to save commitment:', error)
-      // In a real app, show an error notification
-      alert('Failed to save commitment. Please try again.')
+      // Show an error toast notification
+      showToast('Failed to save commitment. Please try again.', 'error')
     }
   }
 
