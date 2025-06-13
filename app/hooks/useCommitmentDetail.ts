@@ -16,6 +16,11 @@ export function useCommitmentDetail(id: string | undefined) {
 
   useEffect(() => {
     if (!id) return
+    if (isLoading) {
+      setCommitment(null)
+      setError(null)
+      return
+    }
 
     const foundCommitment = getCommitment(id)
     if (foundCommitment) {
@@ -23,7 +28,7 @@ export function useCommitmentDetail(id: string | undefined) {
     } else {
       setError('Commitment not found')
     }
-  }, [id, getCommitment])
+  }, [id, getCommitment, isLoading])
 
   const formatDate = (date: Date | null): string => {
     if (!date) return 'Never'
