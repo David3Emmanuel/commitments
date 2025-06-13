@@ -41,11 +41,21 @@ interface DropdownModalInputProps extends BaseModalInputProps {
   onSubmit: (value: string) => void
 }
 
+// Confirm modal props
+interface ConfirmModalInputProps extends BaseModalInputProps {
+  type: 'confirm'
+  message: string
+  confirmLabel?: string
+  cancelLabel?: string
+  onSubmit: (confirmed: boolean) => void
+}
+
 // Union type of all modal input props
 type ModalInputProps =
   | TextModalInputProps
   | DateModalInputProps
   | DropdownModalInputProps
+  | ConfirmModalInputProps
 
 // Context for showing modals
 interface ModalContextType {
@@ -63,6 +73,12 @@ interface ModalContextType {
     options: { value: string; label: string }[],
     initialValue?: string,
   ) => Promise<string | null>
+  showConfirmModal: (
+    title: string,
+    message: string,
+    confirmLabel?: string,
+    cancelLabel?: string,
+  ) => Promise<boolean>
   // For backwards compatibility
   showModal: (
     title: string,
@@ -75,6 +91,7 @@ const ModalContext = React.createContext<ModalContextType>({
   showTextModal: () => Promise.resolve(null),
   showDateModal: () => Promise.resolve(null),
   showDropdownModal: () => Promise.resolve(null),
+  showConfirmModal: () => Promise.resolve(false),
   showModal: () => Promise.resolve(null),
 })
 
@@ -152,6 +169,31 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({
     })
   }
 
+  const showConfirmModal = (
+    title: string,
+    message: string,
+    confirmLabel: string = 'Yes',
+    cancelLabel: string = 'No',
+  ): Promise<boolean> => {
+    return new Promise((resolve) => {
+      setModalProps({
+        type: 'confirm',
+        title,
+        message,
+        confirmLabel,
+        cancelLabel,
+        onSubmit: (confirmed) => {
+          setModalProps(null)
+          resolve(confirmed)
+        },
+        onCancel: () => {
+          setModalProps(null)
+          resolve(false)
+        },
+      })
+    })
+  }
+
   // For backwards compatibility with existing code
   const showModal = (
     title: string,
@@ -166,6 +208,7 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({
         showTextModal,
         showDateModal,
         showDropdownModal,
+        showConfirmModal,
         showModal,
       }}
     >
@@ -441,6 +484,46 @@ const DropdownModalInput: React.FC<DropdownModalInputProps> = ({
   )
 }
 
+const ConfirmModalInput: React.FC<ConfirmModalInputProps> = ({
+  title,
+  message,
+  confirmLabel = 'Yes',
+  cancelLabel = 'No',
+  onSubmit,
+  onCancel,
+}) => {
+  const handleConfirm = (e: React.MouseEvent) => {
+    e.preventDefault()
+    onSubmit(true)
+  }
+
+  return (
+    <Modal isOpen={true} onClose={onCancel} title={title}>
+      <div className='space-y-4'>
+        <p className='text-gray-700 dark:text-gray-300'>{message}</p>
+        <div className='flex justify-end gap-3 mt-6'>
+          <Button
+            variant='secondary'
+            type='button'
+            onClick={onCancel}
+            className='px-4 py-2'
+          >
+            {cancelLabel}
+          </Button>
+          <Button
+            variant='primary'
+            type='button'
+            onClick={handleConfirm}
+            className='px-4 py-2'
+          >
+            {confirmLabel}
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  )
+}
+
 // Unified modal input component that renders the appropriate modal type
 const ModalInput: React.FC<ModalInputProps> = (props) => {
   switch (props.type) {
@@ -450,6 +533,8 @@ const ModalInput: React.FC<ModalInputProps> = (props) => {
       return <DateModalInput {...props} />
     case 'dropdown':
       return <DropdownModalInput {...props} />
+    case 'confirm':
+      return <ConfirmModalInput {...props} />
   }
 }
 

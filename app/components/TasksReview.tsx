@@ -1,5 +1,6 @@
 import React from 'react'
 import type { Task } from '~/lib/types'
+import { useModal } from '~/components/ui/Modal'
 
 interface TasksReviewProps {
   tasks: Task[]
@@ -16,6 +17,7 @@ const TasksReview: React.FC<TasksReviewProps> = ({
   handleEditTask,
   handleDeleteTask,
 }) => {
+  const modal = useModal()
   return (
     <div className='space-y-6'>
       <h2 className='text-lg font-medium text-gray-900 dark:text-white'>
@@ -83,13 +85,18 @@ const TasksReview: React.FC<TasksReviewProps> = ({
                 {handleDeleteTask && (
                   <button
                     onClick={() => {
-                      if (
-                        window.confirm(
+                      modal
+                        .showConfirmModal(
+                          'Delete Task',
                           'Are you sure you want to delete this task?',
+                          'Delete',
+                          'Cancel',
                         )
-                      ) {
-                        handleDeleteTask(task.id)
-                      }
+                        .then((confirmed) => {
+                          if (confirmed) {
+                            handleDeleteTask(task.id)
+                          }
+                        })
                     }}
                     className='p-1 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400'
                     title='Delete task'

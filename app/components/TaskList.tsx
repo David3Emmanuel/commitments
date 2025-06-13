@@ -1,6 +1,7 @@
 import React from 'react'
 import type { Task } from '~/lib/types'
 import { Checkbox, Button } from '~/components/ui'
+import { useModal } from '~/components/ui/Modal'
 
 interface TaskListProps {
   tasks: Task[]
@@ -15,6 +16,7 @@ export default function TaskList({
   onEditTask,
   onDeleteTask,
 }: TaskListProps) {
+  const modal = useModal()
   if (tasks.length === 0) {
     return (
       <p className='text-gray-500 dark:text-gray-400 text-center py-6'>
@@ -76,11 +78,18 @@ export default function TaskList({
                 size='sm'
                 onClick={(e) => {
                   e.preventDefault()
-                  if (
-                    window.confirm('Are you sure you want to delete this task?')
-                  ) {
-                    onDeleteTask(task.id)
-                  }
+                  modal
+                    .showConfirmModal(
+                      'Delete Task',
+                      'Are you sure you want to delete this task?',
+                      'Delete',
+                      'Cancel',
+                    )
+                    .then((confirmed) => {
+                      if (confirmed) {
+                        onDeleteTask(task.id)
+                      }
+                    })
                 }}
                 title='Delete task'
                 icon={
