@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-type TabType = 'details' | 'tasks' | 'habits' | 'notes'
+export type TabType = 'details' | 'tasks' | 'habits' | 'notes' | 'events'
 
 export function useTabNavigation(initialTab: TabType = 'details') {
   const [activeTab, setActiveTab] = useState<TabType>(initialTab)

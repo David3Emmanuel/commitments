@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import NavigationTabs from '~/components/NavigationTabs'
 import { useCommitmentDetail } from '~/hooks/useCommitmentDetail'
+import { type TabType } from '~/hooks/useTabNavigation'
 import {
   CommitmentHeader,
   CommitmentDetails,
@@ -16,9 +17,7 @@ import { useCommitments } from '~/contexts/CommitmentContext'
 export default function CommitmentDetail() {
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
-  const [activeTab, setActiveTab] = useState<
-    'details' | 'tasks' | 'habits' | 'notes' | 'events'
-  >('details')
+  const [activeTab, setActiveTab] = useState<TabType>('details')
   const {
     commitment,
     isLoading,
@@ -115,6 +114,7 @@ export default function CommitmentDetail() {
             <CommitmentDetails
               commitment={commitment}
               formatDate={formatDate}
+              onNavigateToTab={setActiveTab}
             />
           )}
           {activeTab === 'tasks' && (
@@ -134,7 +134,7 @@ export default function CommitmentDetail() {
               onDeleteHabit={handleDeleteHabit}
               onHabitToggle={handleHabitToggle}
             />
-          )}{' '}
+          )}
           {activeTab === 'notes' && (
             <CommitmentNotes
               notes={commitment.notes}
