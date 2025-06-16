@@ -30,7 +30,13 @@ export default function CommitmentDetail() {
     handleArchiveToggle,
     handleEditTask,
     handleDeleteTask,
+    handleEditHabit,
+    handleDeleteHabit,
+    handleHabitToggle,
+    handleEditNote,
+    handleDeleteNote,
   } = useCommitmentDetail(id)
+
   if (isLoading) {
     return (
       <div className='container mx-auto px-4 py-8'>
@@ -83,7 +89,7 @@ export default function CommitmentDetail() {
               commitment={commitment}
               formatDate={formatDate}
             />
-          )}{' '}
+          )}
           {activeTab === 'tasks' && (
             <CommitmentTasks
               tasks={commitment.subItems.tasks}
@@ -97,12 +103,17 @@ export default function CommitmentDetail() {
             <CommitmentHabits
               habits={commitment.subItems.habits}
               onAddHabit={handleAddHabit}
+              onEditHabit={handleEditHabit}
+              onDeleteHabit={handleDeleteHabit}
+              onHabitToggle={handleHabitToggle}
             />
           )}
           {activeTab === 'notes' && (
             <CommitmentNotes
               notes={commitment.notes}
               onAddNote={handleAddNote}
+              onEditNote={handleEditNote}
+              onDeleteNote={handleDeleteNote}
             />
           )}
         </div>

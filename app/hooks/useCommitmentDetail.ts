@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useCommitments } from '~/contexts/CommitmentContext'
 import { useModal } from '~/components/ui'
-import type { Commitment, Task, Habit } from '~/lib/types'
+import type { Commitment, Task, Habit, Note } from '~/lib/types'
 
 export function useCommitmentDetail(id: string | undefined) {
   const [commitment, setCommitment] = useState<Commitment | null>(null)
@@ -192,6 +192,119 @@ export function useCommitmentDetail(id: string | undefined) {
     setCommitment(updatedCommitment)
   }
 
+  const handleEditHabit = async (habitId: string) => {
+    if (!commitment) return
+
+    const habit = commitment.subItems.habits.find((h) => h.id === habitId)
+    if (!habit) return
+
+    const editedHabitTitle = await showTextModal(
+      'Edit habit title:',
+      'Habit title',
+      habit.title,
+    )
+    if (!editedHabitTitle) return
+
+    const scheduleOptions = [
+      { value: 'daily', label: 'Daily' },
+      { value: 'weekly', label: 'Weekly' },
+      { value: 'monthly', label: 'Monthly' },
+    ]
+
+    const schedule = await showDropdownModal(
+      'Select habit frequency',
+      scheduleOptions,
+      habit.schedule,
+    )
+
+    if (!schedule) return
+
+    const updatedHabits = commitment.subItems.habits.map((h) =>
+      h.id === habitId
+        ? {
+            ...h,
+            title: editedHabitTitle,
+            schedule: schedule as 'daily' | 'weekly' | 'monthly',
+          }
+        : h,
+    )
+
+    const updatedCommitment = {
+      ...commitment,
+      subItems: {
+        ...commitment.subItems,
+        habits: updatedHabits,
+      },
+    }
+
+    updateCommitment(updatedCommitment)
+    setCommitment(updatedCommitment)
+  }
+
+  const handleDeleteHabit = (habitId: string) => {
+    if (!commitment) return
+
+    const updatedHabits = commitment.subItems.habits.filter(
+      (habit) => habit.id !== habitId,
+    )
+
+    const updatedCommitment = {
+      ...commitment,
+      subItems: {
+        ...commitment.subItems,
+        habits: updatedHabits,
+      },
+    }
+
+    updateCommitment(updatedCommitment)
+    setCommitment(updatedCommitment)
+  }
+
+  const handleHabitToggle = (habitId: string, date: Date) => {
+    if (!commitment) return
+
+    const habit = commitment.subItems.habits.find((h) => h.id === habitId)
+    if (!habit) return
+
+    // Create a copy of the history array
+    const updatedHistory = [...habit.history]
+
+    // Format the date to compare with other dates in history (YYYY-MM-DD format)
+    const dateStr = date.toISOString().split('T')[0]
+
+    // Check if this date is already in the history
+    const existingIndex = updatedHistory.findIndex(
+      (d) => new Date(d).toISOString().split('T')[0] === dateStr,
+    )
+
+    // If it exists, remove it; otherwise add it
+    if (existingIndex >= 0) {
+      updatedHistory.splice(existingIndex, 1)
+    } else {
+      updatedHistory.push(date)
+    }
+
+    const updatedHabits = commitment.subItems.habits.map((h) =>
+      h.id === habitId
+        ? {
+            ...h,
+            history: updatedHistory,
+          }
+        : h,
+    )
+
+    const updatedCommitment = {
+      ...commitment,
+      subItems: {
+        ...commitment.subItems,
+        habits: updatedHabits,
+      },
+    }
+
+    updateCommitment(updatedCommitment)
+    setCommitment(updatedCommitment)
+  }
+
   const handleAddNote = async () => {
     if (!commitment) return
 
@@ -216,6 +329,52 @@ export function useCommitmentDetail(id: string | undefined) {
     setCommitment(updatedCommitment)
   }
 
+  const handleEditNote = async (noteId: string) => {
+    if (!commitment) return
+
+    const note = commitment.notes.find((n) => n.id === noteId)
+    if (!note) return
+
+    const editedNoteContent = await showTextModal(
+      'Edit note content:',
+      'Note content',
+      note.content,
+    )
+    if (!editedNoteContent) return
+
+    const updatedNotes = commitment.notes.map((n) =>
+      n.id === noteId
+        ? {
+            ...n,
+            content: editedNoteContent,
+            // Note: we're not updating timestamp on edit, keeping original timestamp
+          }
+        : n,
+    )
+
+    const updatedCommitment = {
+      ...commitment,
+      notes: updatedNotes,
+    }
+
+    updateCommitment(updatedCommitment)
+    setCommitment(updatedCommitment)
+  }
+
+  const handleDeleteNote = (noteId: string) => {
+    if (!commitment) return
+
+    const updatedNotes = commitment.notes.filter((note) => note.id !== noteId)
+
+    const updatedCommitment = {
+      ...commitment,
+      notes: updatedNotes,
+    }
+
+    updateCommitment(updatedCommitment)
+    setCommitment(updatedCommitment)
+  }
+
   const handleArchiveToggle = () => {
     if (!commitment) return
 
@@ -234,10 +393,15 @@ export function useCommitmentDetail(id: string | undefined) {
     formatDate,
     handleTaskToggle,
     handleAddTask,
-    handleAddHabit,
-    handleAddNote,
-    handleArchiveToggle,
     handleEditTask,
     handleDeleteTask,
+    handleAddHabit,
+    handleEditHabit,
+    handleDeleteHabit,
+    handleHabitToggle,
+    handleAddNote,
+    handleEditNote,
+    handleDeleteNote,
+    handleArchiveToggle,
   }
 }
