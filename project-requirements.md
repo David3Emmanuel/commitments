@@ -15,13 +15,16 @@ A Commitment Manager is a web application designed to help users track and manag
 
     - One‑off Tasks (with due dates, statuses)
     - Recurring Tasks / Habits (with tracking history)
+    - Task Dependencies (tasks that depend on other tasks)
 
   - Notes section (free‑form updates, progress logs)
 
 - **Review Workflow**: A guided flow that reminds the user to review a commitment, prompts for updates on sub‑items, and logs the review date.
 - **Reminders & Notifications**: Email or in‑app alerts when a review date approaches or sub‑items are overdue.
+- **Auto-Scheduler**: Intelligent scheduling system that suggests optimal dates for tasks based on dependencies, due dates, and user availability.
 - **Analytics & Progress**: Simple charts showing number of reviews completed, tasks closed, and habit streaks per commitment.
 - **Search & Filter**: Find commitments by keywords, filter by status (active/archived), or by next review date.
+- **Calendar Integration**: Synchronize commitments, reviews, and tasks with external calendar services (starting with Google Calendar).
 
 **3. User Stories**
 
@@ -30,6 +33,12 @@ A Commitment Manager is a web application designed to help users track and manag
 3. _As a user, I want to be notified when it's time to review a commitment so I don't forget to check in._
 4. _As a user, I want to log notes during each review so I have a history of my progress._
 5. _As a user, I want to view analytics to see how consistently I’m reviewing and progressing on my commitments._
+6. _As a user, I want to set up task dependencies so that I can visualize and manage the sequential nature of my work._
+7. _As a user, I want an auto-scheduler to suggest optimal times for my tasks based on dependencies, priorities, and estimated durations._
+8. _As a user, I want to search and filter my commitments so I can quickly find the ones I need to focus on._
+9. _As a user, I want to synchronize my commitments and tasks with my external calendar so I can manage all my time commitments in one place._
+10. _As a user, I want to archive completed commitments so I can keep my active list manageable while preserving my history._
+11. _As a user, I want to create an account and log in securely so my commitments are saved and accessible from any device._
 
 **4. Data Model**
 
@@ -50,7 +59,15 @@ goal: {
   status: 'active' | 'archived'
 }
 
-Task: { id, title, dueAt, completed: boolean }
+Task: {
+  id: string,
+  title: string,
+  dueAt: Date,
+  completed: boolean,
+  dependsOn: string[],  // Array of task IDs this task depends on
+  estimatedDuration: number,  // In minutes, used by auto-scheduler
+  priority: 'low' | 'medium' | 'high'
+}
 Habit: { id, title, schedule: 'daily'|'weekly'|..., history: Date[] }
 Note: { id, content, timestamp }
 ```
@@ -61,6 +78,8 @@ Note: { id, content, timestamp }
 - **Dashboard**: Card grid or list of commitments showing title, next review date, progress indicator.
 - **Add/Edit Commitment Modal**: Form fields for title, description, frequency.
 - **Commitment Detail Page**: Tabs or sections for Sub‑items, Notes, Analytics.
+  - **Task Dependencies View**: Visual graph showing task relationships and critical paths.
+  - **Auto-Scheduler Interface**: Calendar view with suggested task timings and ability to adjust.
 - **Review Flow Modal**: Step‑by‑step wizard: Update sub‑items → Add notes → Confirm review.
 
 **6. Tech Stack**
@@ -84,10 +103,13 @@ Note: { id, content, timestamp }
 - **Phase II (2 weeks)**:
 
   1. User auth & onboarding
-  1. Review workflow & logging
-  1. Reminders/notifications
+  2. Task dependencies and dependency visualization
+  3. Auto-scheduler with intelligent task timing
+  4. Review workflow & logging
+  5. Reminders/notifications
 
 - **Phase III (2 weeks)**:
 
   1. Analytics & reports
   2. Search, filters, archiving
+  3. External calendar integrations (Google Calendar first)

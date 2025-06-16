@@ -1,18 +1,29 @@
-# Welcome to React Router!
+# Commitment Manager
 
-A modern, production-ready template for building full-stack React applications using React Router.
+A web application designed to help users track and manage open-ended commitments—projects, goals, or responsibilities that require regular check-ins but cannot simply be marked "done."
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+## Overview
 
-## Features
+Unlike one-off tasks or habits with fixed schedules, commitments often involve multiple sub-items (tasks, habits, notes) and flexible review rhythms. This application helps you stay on top of your long-term commitments by providing structured management and review processes.
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+## Key Features
+
+- **Commitments Dashboard**: View all active commitments, upcoming reviews, and recent activity
+- **Commitment Detail View**:
+  - Title & Description
+  - Review Frequency (weekly, monthly, custom)
+  - Sub-items tracking (tasks, habits)
+  - Notes section for progress logs
+- **Review Workflow**: Guided flow to review commitments, update sub-items, and log progress
+- **Reminders & Notifications**: Alerts for approaching review dates or overdue items
+- **Analytics & Progress**: Charts showing review completion, tasks closed, and habit streaks
+
+## Technical Stack
+
+- **Frontend**: React with React Router v7, TypeScript, Tailwind CSS
+- **Storage**: Local storage (MVP), MongoDB (future)
+- **Backend**: NestJS (planned for post-MVP)
+- **Auth**: Auth0 or custom JWT (planned)
 
 ## Getting Started
 
@@ -26,7 +37,7 @@ npm install
 
 ### Development
 
-Start the development server with HMR:
+Start the development server:
 
 ```bash
 npm run dev
@@ -49,39 +60,12 @@ npm run build
 To build and run using Docker:
 
 ```bash
-docker build -t my-app .
+docker build -t commitment-manager .
 
 # Run the container
-docker run -p 3000:3000 my-app
+docker run -p 3000:3000 commitment-manager
 ```
-
-The containerized application can be deployed to any platform that supports Docker, including:
-
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
-
-### DIY Deployment
-
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
-
-```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
 
 ---
 
-Built with ❤️ using React Router.
+Built with React Router and designed to help you keep your commitments.
