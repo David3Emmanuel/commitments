@@ -37,7 +37,7 @@ export default function CommitmentDetail() {
     handleDeleteNote,
   } = useCommitmentDetail(id)
 
-  if (isLoading) {
+  if (isLoading || !commitment) {
     return (
       <div className='container mx-auto px-4 py-8'>
         <div className='flex justify-center items-center h-64'>
@@ -46,7 +46,7 @@ export default function CommitmentDetail() {
       </div>
     )
   }
-  if (error || contextError || !commitment) {
+  if (error || contextError) {
     return (
       <div className='container mx-auto px-4 py-8'>
         <div className='bg-red-50 dark:bg-red-900 p-6 rounded-lg'>
