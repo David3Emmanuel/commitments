@@ -53,7 +53,7 @@ export default function ReviewCommitment() {
           </h2>
           <p className='text-red-600 dark:text-red-300'>
             {error || 'Commitment not found'}
-          </p>{' '}
+          </p>
           <Button
             onClick={() => (window.location.href = '/')}
             variant='primary'
@@ -68,10 +68,9 @@ export default function ReviewCommitment() {
 
   return (
     <div className='container mx-auto px-4 py-8 max-w-2xl'>
-      {' '}
       <div className='mb-8'>
         <BackButton onClick={cancelReview}>Back to Commitment</BackButton>
-      </div>{' '}
+      </div>
       <Card>
         <CardHeader>
           <h1 className='text-2xl font-bold text-gray-900 dark:text-white'>
@@ -104,14 +103,13 @@ export default function ReviewCommitment() {
               noteContent={noteContent}
               setNoteContent={setNoteContent}
             />
-          )}{' '}
+          )}
           {currentStep === 'complete' && (
             <ReviewComplete onReturn={cancelReview} />
           )}
         </CardContent>
         {currentStep !== 'complete' && (
           <CardFooter>
-            {' '}
             <ReviewFooter
               currentStep={currentStep}
               onCancel={cancelReview}

@@ -9,7 +9,7 @@ interface ReviewProgressProps {
 const ReviewProgress: React.FC<ReviewProgressProps> = ({ currentStep }) => {
   return (
     <div className='px-6 py-4 border-b border-gray-200 dark:border-gray-700'>
-      <div className='flex items-center justify-between mb-2'>
+      <div className='flex items-center justify-between mb-2 overflow-x-auto'>
         <div className='flex items-center'>
           <span
             className={`w-8 h-8 flex items-center justify-center rounded-full ${

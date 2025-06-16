@@ -21,7 +21,7 @@ const Tabs: React.FC<TabsProps> = ({
 }) => {
   return (
     <div
-      className={`flex border-b border-gray-200 dark:border-gray-700 ${className}`}
+      className={`flex border-b border-gray-200 dark:border-gray-700 ${className} overflow-x-auto`}
     >
       {tabs.map((tab) => (
         <button

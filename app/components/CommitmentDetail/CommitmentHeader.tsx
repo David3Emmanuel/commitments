@@ -15,15 +15,15 @@ export default function CommitmentHeader({
   handleArchiveToggle,
 }: CommitmentHeaderProps) {
   return (
-    <div className='p-6 border-b border-gray-200 dark:border-gray-700'>
-      <div className='flex justify-between items-start'>
+    <div className='p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700'>
+      <div className='flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4'>
         <div>
-          <div className='flex items-center'>
-            <h1 className='text-2xl font-bold text-gray-900 dark:text-white'>
+          <div className='flex flex-wrap items-center gap-2'>
+            <h1 className='text-xl sm:text-2xl font-bold text-gray-900 dark:text-white'>
               {commitment.title}
             </h1>
             <span
-              className={`ml-4 text-sm px-2 py-1 rounded-full ${
+              className={`text-xs sm:text-sm px-2 py-1 rounded-full ${
                 commitment.status === 'active'
                   ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                   : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
@@ -32,19 +32,19 @@ export default function CommitmentHeader({
               {commitment.status === 'active' ? 'Active' : 'Archived'}
             </span>
           </div>
-          <p className='text-gray-500 dark:text-gray-400 mt-1'>
+          <p className='text-sm text-gray-500 dark:text-gray-400 mt-1'>
             Created on {formatDate(commitment.createdAt)}
           </p>
         </div>
 
-        <div className='flex space-x-3'>
+        <div className='flex flex-wrap gap-2'>
           <Link
             to={`/commitments/${commitment.id}/edit`}
-            className='px-3 py-1 rounded-md border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center'
+            className='px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-md border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center'
           >
             <svg
               xmlns='http://www.w3.org/2000/svg'
-              className='h-4 w-4 mr-1'
+              className='h-3 w-3 sm:h-4 sm:w-4 mr-1'
               viewBox='0 0 20 20'
               fill='currentColor'
             >
@@ -57,15 +57,14 @@ export default function CommitmentHeader({
             </svg>
             Edit
           </Link>
-
           {isReviewDue(commitment) && (
             <Link
               to={`/commitments/${commitment.id}/review`}
-              className='px-3 py-1 rounded-md bg-blue-600 text-white hover:bg-blue-700 flex items-center'
+              className='px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 flex items-center'
             >
               <svg
                 xmlns='http://www.w3.org/2000/svg'
-                className='h-4 w-4 mr-1'
+                className='h-3 w-3 sm:h-4 sm:w-4 mr-1'
                 viewBox='0 0 20 20'
                 fill='currentColor'
               >
@@ -78,16 +77,16 @@ export default function CommitmentHeader({
               Review Now
             </Link>
           )}
-
           <button
             onClick={handleArchiveToggle}
-            className='px-3 py-1 rounded-md border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center'
+            className='px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-md border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center'
           >
+            {' '}
             {commitment.status === 'active' ? (
               <>
                 <svg
                   xmlns='http://www.w3.org/2000/svg'
-                  className='h-4 w-4 mr-1'
+                  className='h-3 w-3 sm:h-4 sm:w-4 mr-1'
                   viewBox='0 0 20 20'
                   fill='currentColor'
                 >
@@ -98,13 +97,13 @@ export default function CommitmentHeader({
                     clipRule='evenodd'
                   />
                 </svg>
-                Archive
+                <span className='sm:inline'>Archive</span>
               </>
             ) : (
               <>
                 <svg
                   xmlns='http://www.w3.org/2000/svg'
-                  className='h-4 w-4 mr-1'
+                  className='h-3 w-3 sm:h-4 sm:w-4 mr-1'
                   viewBox='0 0 20 20'
                   fill='currentColor'
                 >
@@ -115,7 +114,7 @@ export default function CommitmentHeader({
                     clipRule='evenodd'
                   />
                 </svg>
-                Unarchive
+                <span className='sm:inline'>Unarchive</span>
               </>
             )}
           </button>
