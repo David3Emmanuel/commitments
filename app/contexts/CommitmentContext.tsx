@@ -82,46 +82,56 @@ export function CommitmentProvider({ children }: { children: ReactNode }) {
   }
 
   const saveCommitment = (commitment: Commitment) => {
-    const index = commitments.findIndex((c) => c.id === commitment.id)
-    let updatedCommitments: Commitment[]
+    setCommitments((prev) => {
+      const index = prev.findIndex((c) => c.id === commitment.id)
+      let updatedCommitments: Commitment[]
 
-    if (index !== -1) {
-      updatedCommitments = [...commitments]
-      updatedCommitments[index] = commitment
-    } else {
-      updatedCommitments = [...commitments, commitment]
-    }
+      if (index !== -1) {
+        updatedCommitments = [...prev]
+        updatedCommitments[index] = commitment
+      } else {
+        updatedCommitments = [...prev, commitment]
+      }
 
-    setCommitments(updatedCommitments)
-    saveToLocalStorage(updatedCommitments)
+      saveToLocalStorage(updatedCommitments)
+      return updatedCommitments
+    })
   }
 
   const createCommitment = (commitment: Commitment) => {
-    const updatedCommitments = [...commitments, commitment]
-    setCommitments(updatedCommitments)
-    saveToLocalStorage(updatedCommitments)
+    setCommitments((prev) => {
+      const updatedCommitments = [...prev, commitment]
+      saveToLocalStorage(updatedCommitments)
+      return updatedCommitments
+    })
   }
 
   const updateCommitment = (commitment: Commitment) => {
-    const updatedCommitments = commitments.map((c) =>
-      c.id === commitment.id ? commitment : c,
-    )
-    setCommitments(updatedCommitments)
-    saveToLocalStorage(updatedCommitments)
+    setCommitments((prev) => {
+      const updatedCommitments = prev.map((c) =>
+        c.id === commitment.id ? commitment : c,
+      )
+      saveToLocalStorage(updatedCommitments)
+      return updatedCommitments
+    })
   }
 
   const deleteCommitment = (id: string) => {
-    const updatedCommitments = commitments.filter((c) => c.id !== id)
-    setCommitments(updatedCommitments)
-    saveToLocalStorage(updatedCommitments)
+    setCommitments((prev) => {
+      const updatedCommitments = prev.filter((c) => c.id !== id)
+      saveToLocalStorage(updatedCommitments)
+      return updatedCommitments
+    })
   }
 
   const archiveCommitment = (id: string) => {
-    const updatedCommitments = commitments.map((c) =>
-      c.id === id ? { ...c, status: 'archived' as const } : c,
-    )
-    setCommitments(updatedCommitments)
-    saveToLocalStorage(updatedCommitments)
+    setCommitments((prev) => {
+      const updatedCommitments = prev.map((c) =>
+        c.id === id ? { ...c, status: 'archived' as const } : c,
+      )
+      saveToLocalStorage(updatedCommitments)
+      return updatedCommitments
+    })
   }
 
   const getActiveCommitments = () => {
