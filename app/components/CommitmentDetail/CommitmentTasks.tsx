@@ -43,7 +43,7 @@ export default function CommitmentTasks({
           }
         >
           Add Task
-        </Button>{' '}
+        </Button>
       </div>
 
       <TaskList

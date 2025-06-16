@@ -81,7 +81,6 @@ export default function CommitmentHeader({
             onClick={handleArchiveToggle}
             className='px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-md border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center'
           >
-            {' '}
             {commitment.status === 'active' ? (
               <>
                 <svg

@@ -2,6 +2,12 @@ import { useState } from 'react'
 import type { Commitment, Event } from '~/lib/types'
 import { Button, Card } from './ui'
 import { EventCard } from './EventCard'
+import {
+  compareEventsByUrgency,
+  getEventUrgency,
+  getUrgencyClass,
+} from '~/lib/sortUtils'
+import { getStartOfDay, getTomorrow } from '~/lib/dateUtils'
 
 interface EventListProps {
   commitment: Commitment
@@ -16,8 +22,8 @@ export function EventList({
 }: EventListProps) {
   const [filter, setFilter] = useState<'upcoming' | 'past' | 'all'>('upcoming')
 
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
+  // Use utility to get today at midnight
+  const today = getStartOfDay()
 
   const events = commitment.events || []
 
@@ -32,12 +38,11 @@ export function EventList({
       return eventDate < today
     }
   })
-  // Sort by date (closest first for upcoming, most recent first for past)
-  const sortedEvents = [...filteredEvents].sort((a, b) => {
-    const dateA = new Date(a.date).getTime()
-    const dateB = new Date(b.date).getTime()
-    return filter === 'past' ? dateB - dateA : dateA - dateB
-  })
+
+  // Sort by urgency using utility function
+  const sortedEvents = [...filteredEvents].sort((a, b) =>
+    compareEventsByUrgency(a, b, filter === 'past'),
+  )
 
   return (
     <div className='space-y-4'>
@@ -78,16 +83,23 @@ export function EventList({
         >
           All
         </button>
-      </div>{' '}
+      </div>
       {sortedEvents.length === 0 ? (
         <div className='text-center py-8 text-gray-500'>
           No {filter} events found
         </div>
       ) : (
         <div className='space-y-3'>
-          {sortedEvents.map((event) => (
-            <EventCard key={event.id} event={event} onClick={onEditEvent} />
-          ))}
+          {sortedEvents.map((event) => {
+            // Get urgency class from utility
+            const urgencyClass = getUrgencyClass(getEventUrgency(event))
+
+            return (
+              <div key={event.id} className={urgencyClass}>
+                <EventCard event={event} onClick={onEditEvent} />
+              </div>
+            )
+          })}
         </div>
       )}
     </div>

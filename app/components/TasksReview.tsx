@@ -55,7 +55,7 @@ const TasksReview: React.FC<TasksReviewProps> = ({
                   }`}
                 >
                   {task.title}
-                </span>{' '}
+                </span>
               </div>
 
               <div className='flex items-center gap-2'>
