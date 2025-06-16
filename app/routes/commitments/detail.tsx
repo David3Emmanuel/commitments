@@ -10,6 +10,7 @@ import {
   CommitmentNotes,
 } from '~/components/CommitmentDetail'
 import { BackButton, Button } from '~/components/ui'
+import { useCommitments } from '~/contexts/CommitmentContext'
 
 export default function CommitmentDetail() {
   const navigate = useNavigate()
@@ -36,12 +37,37 @@ export default function CommitmentDetail() {
     handleEditNote,
     handleDeleteNote,
   } = useCommitmentDetail(id)
+  const { loadCommitments } = useCommitments()
 
-  if (isLoading || !commitment) {
+  if (isLoading) {
     return (
       <div className='container mx-auto px-4 py-8'>
         <div className='flex justify-center items-center h-64'>
           <p className='text-gray-500'>Loading commitment details...</p>
+        </div>
+      </div>
+    )
+  }
+  if (!commitment) {
+    return (
+      <div className='container mx-auto px-4 py-8'>
+        <div className='bg-yellow-50 dark:bg-yellow-900 p-6 rounded-lg'>
+          <h2 className='text-xl font-medium text-yellow-800 dark:text-yellow-200 mb-2'>
+            Commitment Not Found
+          </h2>
+          <p className='text-yellow-600 dark:text-yellow-300'>
+            The commitment you are looking for does not exist.
+          </p>
+          <Button
+            onClick={() => {
+              loadCommitments()
+              navigate('/')
+            }}
+            className='mt-4'
+            variant='primary'
+          >
+            Return to Dashboard
+          </Button>
         </div>
       </div>
     )
