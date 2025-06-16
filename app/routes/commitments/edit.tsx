@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import type { Commitment } from '~/lib/types'
+import { useCommitments } from '~/contexts/CommitmentContext'
 import {
   BackButton,
   Button,
@@ -17,6 +18,11 @@ export default function EditCommitment() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { showToast } = useToast()
+  const {
+    getCommitment,
+    updateCommitment,
+    isLoading: contextLoading,
+  } = useCommitments()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [reviewType, setReviewType] = useState<'interval' | 'custom'>(
@@ -31,66 +37,39 @@ export default function EditCommitment() {
 
   useEffect(() => {
     if (!id) return
+    if (contextLoading) return
 
-    // Load commitment from localStorage
+    // Load commitment from context
     const loadCommitment = () => {
       setIsLoading(true)
       setError(null)
 
       try {
-        const storedCommitments = localStorage.getItem('commitments')
-        if (storedCommitments) {
-          const commitments = JSON.parse(storedCommitments, (key, value) => {
-            if (
-              key === 'createdAt' ||
-              key === 'lastReviewedAt' ||
-              key === 'dueAt' ||
-              key === 'timestamp'
-            ) {
-              return value ? new Date(value) : null
-            }
-            if (key === 'history' && Array.isArray(value)) {
-              return value.map((date) => new Date(date))
-            }
-            return value
-          })
-
-          const foundCommitment = commitments.find(
-            (c: Commitment) => c.id === id,
-          )
-          if (foundCommitment) {
-            setOriginalCommitment(foundCommitment)
-            setTitle(foundCommitment.title)
-            setDescription(foundCommitment.description || '')
-            setReviewType(foundCommitment.reviewFrequency.type)
-
-            if (
-              foundCommitment.reviewFrequency.type === 'interval' &&
-              foundCommitment.reviewFrequency.intervalDays
-            ) {
-              setIntervalDays(foundCommitment.reviewFrequency.intervalDays)
-            } else if (
-              foundCommitment.reviewFrequency.type === 'custom' &&
-              foundCommitment.reviewFrequency.customCron
-            ) {
-              setCustomCron(foundCommitment.reviewFrequency.customCron)
-            }
+        const commitment = getCommitment(id)
+        if (commitment) {
+          setOriginalCommitment(commitment)
+          // Initialize form fields
+          setTitle(commitment.title)
+          setDescription(commitment.description)
+          setReviewType(commitment.reviewFrequency.type)
+          if (commitment.reviewFrequency.type === 'interval') {
+            setIntervalDays(commitment.reviewFrequency.intervalDays || 7)
           } else {
-            setError('Commitment not found')
+            setCustomCron(commitment.reviewFrequency.customCron || '')
           }
         } else {
-          setError('No commitments found')
+          setError('Commitment not found')
         }
-      } catch (error) {
-        console.error('Failed to load commitment:', error)
-        setError('Failed to load commitment data')
+      } catch (err) {
+        console.error('Failed to load commitment:', err)
+        setError('Failed to load commitment')
       } finally {
         setIsLoading(false)
       }
     }
 
     loadCommitment()
-  }, [id])
+  }, [id, getCommitment, contextLoading])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -110,19 +89,9 @@ export default function EditCommitment() {
       },
     }
 
-    // Save to localStorage
+    // Save to context
     try {
-      const existingCommitments = localStorage.getItem('commitments')
-      if (!existingCommitments) {
-        throw new Error('No commitments found')
-      }
-
-      let commitments = JSON.parse(existingCommitments)
-      commitments = commitments.map((c: Commitment) =>
-        c.id === id ? updatedCommitment : c,
-      )
-      localStorage.setItem('commitments', JSON.stringify(commitments))
-
+      updateCommitment(updatedCommitment)
       // Navigate back to the commitment detail page
       navigate(`/commitments/${id}`)
     } catch (error) {

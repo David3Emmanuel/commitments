@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
+import { useCommitments } from '~/contexts/CommitmentContext'
 
 import {
   BackButton,
@@ -15,6 +16,7 @@ import {
 
 export default function NewCommitment() {
   const navigate = useNavigate()
+  const { createCommitment } = useCommitments()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [reviewType, setReviewType] = useState<'interval' | 'custom'>(
@@ -48,21 +50,12 @@ export default function NewCommitment() {
       status: 'active' as const,
     }
 
-    // Save to localStorage (for MVP)
     try {
-      const existingCommitments = localStorage.getItem('commitments')
-      let commitments = existingCommitments
-        ? JSON.parse(existingCommitments)
-        : []
+      // Use the context method instead of directly manipulating localStorage
+      createCommitment(newCommitment)
 
-      // Add the new commitment
-      commitments.push(newCommitment)
-
-      // Save back to localStorage
-      localStorage.setItem('commitments', JSON.stringify(commitments))
-
-      // Navigate to the dashboard
-      navigate('/')
+      // Navigate to the detail page for the new commitment
+      navigate(`/commitments/${id}`)
     } catch (error) {
       console.error('Failed to save commitment:', error)
       // Show an error toast notification
