@@ -3,6 +3,7 @@ import CommitmentDetails from './CommitmentDetails'
 import CommitmentTasks from './CommitmentTasks'
 import CommitmentHabits from './CommitmentHabits'
 import CommitmentNotes from './CommitmentNotes'
+import { CommitmentEvents } from './CommitmentEvents'
 
 export {
   CommitmentHeader,
@@ -10,4 +11,5 @@ export {
   CommitmentTasks,
   CommitmentHabits,
   CommitmentNotes,
+  CommitmentEvents,
 }

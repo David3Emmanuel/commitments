@@ -2,7 +2,7 @@ import React from 'react'
 import type { Commitment } from '~/lib/types'
 import { Tabs } from '~/components/ui'
 
-type TabType = 'details' | 'tasks' | 'habits' | 'notes'
+type TabType = 'details' | 'tasks' | 'habits' | 'notes' | 'events'
 
 interface NavigationTabsProps {
   activeTab: TabType
@@ -20,6 +20,7 @@ export default function NavigationTabs({
     { id: 'tasks', label: 'Tasks', count: commitment.subItems.tasks.length },
     { id: 'habits', label: 'Habits', count: commitment.subItems.habits.length },
     { id: 'notes', label: 'Notes', count: commitment.notes.length },
+    { id: 'events', label: 'Events', count: commitment.events.length },
   ]
 
   return (

@@ -48,7 +48,9 @@ export function CommitmentProvider({ children }: { children: ReactNode }) {
             key === 'createdAt' ||
             key === 'lastReviewedAt' ||
             key === 'dueAt' ||
-            key === 'timestamp'
+            key === 'timestamp' ||
+            key === 'date' ||
+            key === 'reminderTime'
           ) {
             return value ? new Date(value) : null
           }

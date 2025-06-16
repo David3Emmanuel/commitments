@@ -8,6 +8,7 @@ import {
   CommitmentTasks,
   CommitmentHabits,
   CommitmentNotes,
+  CommitmentEvents,
 } from '~/components/CommitmentDetail'
 import { BackButton, Button } from '~/components/ui'
 import { useCommitments } from '~/contexts/CommitmentContext'
@@ -16,7 +17,7 @@ export default function CommitmentDetail() {
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const [activeTab, setActiveTab] = useState<
-    'details' | 'tasks' | 'habits' | 'notes'
+    'details' | 'tasks' | 'habits' | 'notes' | 'events'
   >('details')
   const {
     commitment,
@@ -133,7 +134,7 @@ export default function CommitmentDetail() {
               onDeleteHabit={handleDeleteHabit}
               onHabitToggle={handleHabitToggle}
             />
-          )}
+          )}{' '}
           {activeTab === 'notes' && (
             <CommitmentNotes
               notes={commitment.notes}
@@ -141,6 +142,9 @@ export default function CommitmentDetail() {
               onEditNote={handleEditNote}
               onDeleteNote={handleDeleteNote}
             />
+          )}
+          {activeTab === 'events' && (
+            <CommitmentEvents commitment={commitment} />
           )}
         </div>
       </div>

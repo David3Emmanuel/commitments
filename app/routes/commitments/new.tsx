@@ -13,6 +13,7 @@ import {
   CardContent,
   useToast,
 } from '~/components/ui'
+import type { Commitment } from '~/lib/types'
 
 export default function NewCommitment() {
   const navigate = useNavigate()
@@ -32,7 +33,7 @@ export default function NewCommitment() {
     // Generate a unique ID
     const id = `commitment-${Date.now()}`
 
-    const newCommitment = {
+    const newCommitment: Commitment = {
       id,
       title,
       description,
@@ -47,6 +48,7 @@ export default function NewCommitment() {
         habits: [],
       },
       notes: [],
+      events: [],
       status: 'active' as const,
     }
 

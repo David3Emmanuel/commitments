@@ -18,6 +18,17 @@ export type Note = {
   timestamp: Date
 }
 
+export type Event = {
+  id: string
+  title: string
+  date: Date
+  time: string
+  location?: string
+  description?: string
+  reminderTime?: Date
+  isAllDay: boolean
+}
+
 export type Commitment = {
   id: string
   title: string
@@ -34,5 +45,6 @@ export type Commitment = {
     habits: Habit[]
   }
   notes: Note[]
+  events: Event[]
   status: 'active' | 'archived'
 }
