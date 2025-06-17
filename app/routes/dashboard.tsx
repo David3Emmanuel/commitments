@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import type { Route } from './+types/dashboard'
 import { CommitmentCard } from '~/components/CommitmentCard'
 import { Button, Tabs } from '~/components/ui'
+import { SearchCommitments } from '~/components/SearchCommitments'
 import { useCommitments } from '~/contexts/CommitmentContext'
 import { compareCommitmentsByUrgency } from '~/lib/sort'
 
@@ -27,22 +28,8 @@ export default function Dashboard() {
       return <div className='text-center py-12'>Loading commitments...</div>
     }
 
-    if (filteredCommitments.length === 0) {
-      return (
-        <div className='text-center py-12'>
-          <p className='text-gray-500 mb-4'>
-            {viewMode === 'active'
-              ? 'You have no active commitments'
-              : 'You have no archived commitments'}
-          </p>
-          {viewMode === 'active' && (
-            <Link to='/commitments/new'>
-              <Button variant='primary'>Create Your First Commitment</Button>
-            </Link>
-          )}
-        </div>
-      )
-    }
+    if (filteredCommitments.length === 0)
+      return <NoCommitmentsMessage viewMode={viewMode} />
 
     return (
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
@@ -52,10 +39,9 @@ export default function Dashboard() {
       </div>
     )
   }
-
   return (
     <div className='container mx-auto px-4 py-8'>
-      <div className='flex justify-between items-center mb-8'>
+      <div className='flex justify-between items-center mb-4'>
         <h1 className='text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white'>
           Commitments Dashboard
         </h1>
@@ -67,6 +53,10 @@ export default function Dashboard() {
             New
           </Button>
         </Link>
+      </div>
+
+      <div className='mb-6'>
+        <SearchCommitments className='mb-4' />
       </div>
 
       <div className='flex justify-center mb-6'>
@@ -82,6 +72,27 @@ export default function Dashboard() {
       </div>
 
       {renderCommitments()}
+    </div>
+  )
+}
+
+function NoCommitmentsMessage({
+  viewMode,
+}: {
+  viewMode: 'active' | 'archived'
+}) {
+  return (
+    <div className='text-center py-12'>
+      <p className='text-gray-500 mb-4'>
+        {viewMode === 'active'
+          ? 'You have no active commitments'
+          : 'You have no archived commitments'}
+      </p>
+      {viewMode === 'active' && (
+        <Link to='/commitments/new'>
+          <Button variant='primary'>Create Your First Commitment</Button>
+        </Link>
+      )}
     </div>
   )
 }
