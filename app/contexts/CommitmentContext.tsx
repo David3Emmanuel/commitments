@@ -60,7 +60,21 @@ export function CommitmentProvider({ children }: { children: ReactNode }) {
           return value
         })
 
-        setCommitments(parsed)
+        if (!Array.isArray(parsed)) {
+          throw new Error('Invalid commitments data format')
+        }
+
+        const validated: Commitment[] = parsed.map((commitment) => ({
+          ...commitment,
+          subItems: {
+            tasks: commitment.subItems?.tasks || [],
+            habits: commitment.subItems?.habits || [],
+            events: commitment.subItems?.events || [],
+          },
+          history: commitment.history || [],
+        }))
+
+        setCommitments(validated)
       }
     } catch (err) {
       console.error('Failed to load commitments:', err)
