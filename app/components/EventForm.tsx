@@ -17,9 +17,14 @@ export function EventForm({ event, isOpen, onClose, onSave }: EventFormProps) {
   const [isAllDay, setIsAllDay] = useState(false)
   const [location, setLocation] = useState('')
   const [description, setDescription] = useState('')
+  const [isRecurring, setIsRecurring] = useState(false) // UI state only
+  const [schedule, setSchedule] = useState<
+    'daily' | 'weekly' | 'monthly' | undefined
+  >(undefined)
+  const [endOn, setEndOn] = useState('')
+  const [hasEndDate, setHasEndDate] = useState(false)
   const [hasReminder, setHasReminder] = useState(false)
   const [reminderDays, setReminderDays] = useState('1')
-
   // Initialize form when event changes
   useEffect(() => {
     if (event) {
@@ -29,6 +34,19 @@ export function EventForm({ event, isOpen, onClose, onSave }: EventFormProps) {
       setIsAllDay(event.isAllDay)
       setLocation(event.location || '')
       setDescription(event.description || '')
+      setIsRecurring(Boolean(event.schedule)) // If schedule exists, it's recurring
+      if (event.schedule) {
+        setSchedule(event.schedule)
+      } else {
+        setSchedule(undefined)
+      }
+      if (event.endOn) {
+        setHasEndDate(true)
+        setEndOn(formatDateForInput(new Date(event.endOn)))
+      } else {
+        setHasEndDate(false)
+        setEndOn('')
+      }
       setHasReminder(Boolean(event.reminderTime))
 
       if (event.reminderTime) {
@@ -48,6 +66,10 @@ export function EventForm({ event, isOpen, onClose, onSave }: EventFormProps) {
       setIsAllDay(false)
       setLocation('')
       setDescription('')
+      setIsRecurring(false)
+      setSchedule('weekly')
+      setHasEndDate(false)
+      setEndOn('')
       setHasReminder(false)
       setReminderDays('1')
     }
@@ -68,18 +90,31 @@ export function EventForm({ event, isOpen, onClose, onSave }: EventFormProps) {
 
     const eventDate = new Date(date)
     let reminderTime: Date | undefined
+    let endOnDate: Date | null | undefined
 
     if (hasReminder) {
       reminderTime = new Date(date)
       reminderTime.setDate(reminderTime.getDate() - parseInt(reminderDays, 10))
+      // Validation: Prevent reminder time in the past
+      if (reminderTime.getTime() < Date.now()) {
+        alert(
+          'Reminder time cannot be set in the past. Please adjust the reminder days or event date.',
+        )
+        return
+      }
     }
 
+    if (hasEndDate && endOn) {
+      endOnDate = new Date(endOn)
+    }
     const newEvent: Event = {
       id: event?.id || crypto.randomUUID(),
       title,
       date: eventDate,
       time: isAllDay ? '' : time,
       isAllDay,
+      ...(isRecurring ? { schedule } : {}),
+      ...(isRecurring && hasEndDate && endOnDate ? { endOn: endOnDate } : {}),
       ...(location ? { location } : {}),
       ...(description ? { description } : {}),
       ...(reminderTime ? { reminderTime } : {}),
@@ -160,6 +195,82 @@ export function EventForm({ event, isOpen, onClose, onSave }: EventFormProps) {
             />
           </div>
         </div>
+
+        <div className='flex items-center mb-3'>
+          <input
+            type='checkbox'
+            id='isRecurring'
+            checked={isRecurring}
+            onChange={(e) => setIsRecurring(e.target.checked)}
+            className='mr-2'
+          />
+          <label
+            htmlFor='isRecurring'
+            className='text-sm font-medium text-gray-700 dark:text-gray-300'
+          >
+            Recurring event
+          </label>
+        </div>
+
+        {isRecurring && (
+          <>
+            <div className='mb-3'>
+              <label
+                htmlFor='schedule'
+                className='block text-sm font-medium text-gray-700 dark:text-gray-300'
+              >
+                Repeat schedule
+              </label>
+              <Select
+                id='schedule'
+                value={schedule}
+                onChange={(e) =>
+                  setSchedule(e.target.value as 'daily' | 'weekly' | 'monthly')
+                }
+                className='mt-1 w-full'
+              >
+                <option value='daily'>Daily</option>
+                <option value='weekly'>Weekly</option>
+                <option value='monthly'>Monthly</option>
+              </Select>
+            </div>
+
+            <div className='flex items-center mb-3'>
+              <input
+                type='checkbox'
+                id='hasEndDate'
+                checked={hasEndDate}
+                onChange={(e) => setHasEndDate(e.target.checked)}
+                className='mr-2'
+              />
+              <label
+                htmlFor='hasEndDate'
+                className='text-sm font-medium text-gray-700 dark:text-gray-300'
+              >
+                Set end date
+              </label>
+            </div>
+
+            {hasEndDate && (
+              <div className='mb-3'>
+                <label
+                  htmlFor='endOn'
+                  className='block text-sm font-medium text-gray-700 dark:text-gray-300'
+                >
+                  End date
+                </label>
+                <TextInput
+                  type='date'
+                  id='endOn'
+                  value={endOn}
+                  onChange={(e) => setEndOn(e.target.value)}
+                  required={hasEndDate}
+                  className='mt-1 w-full'
+                />
+              </div>
+            )}
+          </>
+        )}
 
         <div>
           <label

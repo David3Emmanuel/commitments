@@ -1,4 +1,5 @@
 import type React from 'react'
+import { isHabitActive } from '~/lib/habitUtils'
 import type { Habit } from '~/lib/types'
 
 export function HabitToggle({
@@ -15,6 +16,33 @@ export function HabitToggle({
   const isTrackedToday = habit.history.some((date) => {
     return new Date(date).toDateString() === todayStr
   })
+
+  // If habit is not active, return a disabled button
+  if (!isHabitActive(habit)) {
+    return (
+      <button
+        disabled
+        aria-disabled='true'
+        className='relative flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
+        title='Habit not active for today'
+      >
+        <svg
+          xmlns='http://www.w3.org/2000/svg'
+          className='h-5 w-5'
+          fill='none'
+          viewBox='0 0 24 24'
+          stroke='currentColor'
+        >
+          <path
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            strokeWidth={2}
+            d='M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z'
+          />
+        </svg>
+      </button>
+    )
+  }
 
   return (
     <button

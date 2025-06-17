@@ -1,5 +1,9 @@
 import type { Event, Habit, Task, Commitment } from './types'
-import { getNextHabitDate, getNextReviewDate } from './detailFunctions'
+import {
+  getNextHabitDate,
+  getNextReviewDate,
+  getNextEventDate,
+} from './detailFunctions'
 import { getStartOfDay, isSameDay, getTomorrow } from './dateUtils'
 
 /**
@@ -35,9 +39,20 @@ export const getTaskUrgency = (task: Task): UrgencyLevel => {
  */
 export const getHabitUrgency = (habit: Habit): UrgencyLevel => {
   const today = getStartOfDay()
+
+  // Check if habit is active based on startOn and endOn dates
+  const startOn = habit.startOn ? new Date(habit.startOn) : null
+  const endOn = habit.endOn ? new Date(habit.endOn) : null
+
+  // If habit hasn't started yet or has already ended, mark as normal
+  if ((startOn && today < startOn) || (endOn && today > endOn)) {
+    return 'normal'
+  }
+
   const nextDueDate = getNextHabitDate(habit, today)
   const tomorrow = getTomorrow()
 
+  if (!nextDueDate) return 'normal'
   if (nextDueDate < today) return 'urgent'
   if (isSameDay(nextDueDate, today)) return 'upcoming'
   if (isSameDay(nextDueDate, tomorrow)) return 'tomorrow'
@@ -53,21 +68,33 @@ export const getHabitUrgency = (habit: Habit): UrgencyLevel => {
 export const getEventUrgency = (event: Event): UrgencyLevel => {
   const today = getStartOfDay()
   const tomorrow = getTomorrow()
-  const eventDate = new Date(event.date)
-  eventDate.setHours(0, 0, 0, 0)
   const now = new Date()
+
+  let relevantDate: Date
+
+  // For recurring events, get the next occurrence date
+  if (event.schedule) {
+    const nextDate = getNextEventDate(event, today)
+    if (!nextDate) return 'normal' // No future occurrences
+    relevantDate = nextDate
+  } else {
+    // For non-recurring events, use the original date
+    relevantDate = new Date(event.date)
+  }
+
+  relevantDate.setHours(0, 0, 0, 0)
 
   // Event with passed reminder but not yet happened
   if (
     event.reminderTime &&
     new Date(event.reminderTime) <= now &&
-    eventDate >= today
+    relevantDate >= today
   ) {
     return 'urgent'
   }
 
-  if (isSameDay(eventDate, today)) return 'upcoming'
-  if (isSameDay(eventDate, tomorrow)) return 'tomorrow'
+  if (isSameDay(relevantDate, today)) return 'upcoming'
+  if (isSameDay(relevantDate, tomorrow)) return 'tomorrow'
   return 'normal'
 }
 
@@ -143,6 +170,42 @@ export const compareTasksByUrgency = (a: Task, b: Task): number => {
 export const compareHabitsByUrgency = (a: Habit, b: Habit): number => {
   const today = getStartOfDay()
 
+  // Check if habits are active based on startOn and endOn dates
+  const aStartOn = a.startOn ? new Date(a.startOn) : null
+  const aEndOn = a.endOn ? new Date(a.endOn) : null
+  const bStartOn = b.startOn ? new Date(b.startOn) : null
+  const bEndOn = b.endOn ? new Date(b.endOn) : null
+
+  const aIsActive =
+    (!aStartOn || today >= aStartOn) && (!aEndOn || today <= aEndOn)
+  const bIsActive =
+    (!bStartOn || today >= bStartOn) && (!bEndOn || today <= bEndOn)
+
+  // Active habits should come before inactive ones
+  if (aIsActive !== bIsActive) {
+    return aIsActive ? -1 : 1
+  }
+
+  // If both are inactive, habits that haven't started yet should come before ones that have ended
+  if (!aIsActive && !bIsActive) {
+    const aHasntStarted = aStartOn && today < aStartOn
+    const bHasntStarted = bStartOn && today < bStartOn
+
+    if (aHasntStarted !== bHasntStarted) {
+      return aHasntStarted ? -1 : 1
+    }
+
+    // Sort by start date (upcoming soonest first)
+    if (aHasntStarted && bHasntStarted && aStartOn && bStartOn) {
+      return aStartOn.getTime() - bStartOn.getTime()
+    }
+
+    // For ended habits, sort by end date (most recently ended first)
+    if (aEndOn && bEndOn) {
+      return bEndOn.getTime() - aEndOn.getTime()
+    }
+  }
+
   // Get urgency levels
   const aUrgency = getHabitUrgency(a)
   const bUrgency = getHabitUrgency(b)
@@ -162,6 +225,11 @@ export const compareHabitsByUrgency = (a: Habit, b: Habit): number => {
 
   const aNextDate = getNextHabitDate(a, today)
   const bNextDate = getNextHabitDate(b, today)
+
+  // Handle null dates - habits with no next date go at the bottom
+  if (!aNextDate && !bNextDate) return 0
+  if (!aNextDate) return 1 // a goes after b
+  if (!bNextDate) return -1 // a goes before b
 
   // If both are due on the same day, sort by frequency (daily before weekly before monthly)
   if (isSameDay(aNextDate, bNextDate)) {

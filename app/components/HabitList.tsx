@@ -1,8 +1,8 @@
-import React from 'react'
 import type { Habit } from '~/lib/types'
 import { Badge, Button } from '~/components/ui'
 import { useModal } from '~/components/ui/Modal'
-import { HabitToggle } from './HabitToggle'
+import { HabitToggle } from '~/components/HabitToggle'
+import { isHabitActive } from '~/lib/habitUtils'
 import {
   compareHabitsByUrgency,
   getHabitUrgency,
@@ -33,7 +33,12 @@ export default function HabitList({
     )
   }
 
-  // Sort habits by urgency using utility function
+  // Format date for display, returning a friendly message if null
+  const formatDate = (date: Date | null | undefined): string => {
+    if (!date) return 'Not set'
+    return new Date(date).toLocaleDateString()
+  }
+
   const sortedHabits = [...habits].sort(compareHabitsByUrgency)
 
   return (
@@ -41,17 +46,21 @@ export default function HabitList({
       {sortedHabits.map((habit) => {
         // Get urgency class from utility
         const urgencyClass = getUrgencyClass(getHabitUrgency(habit))
+        const isActive = isHabitActive(habit)
 
         return (
           <li key={habit.id} className={`py-4 ${urgencyClass}`}>
             <div className='flex items-center justify-between'>
               <h3 className='text-sm font-medium text-gray-800 dark:text-gray-200'>
                 {habit.title}
+                {!isActive && (
+                  <span className='ml-2 text-xs text-gray-400'>(Inactive)</span>
+                )}
               </h3>
               <div className='flex items-center gap-2'>
                 <Badge variant='primary'>{habit.schedule}</Badge>
 
-                {onHabitToggle && (
+                {onHabitToggle && isActive && (
                   <HabitToggle habit={habit} onToggle={onHabitToggle} />
                 )}
 
@@ -116,9 +125,11 @@ export default function HabitList({
               </div>
             </div>
             <div className='mt-2'>
-              <p className='text-xs text-gray-500 dark:text-gray-400'>
-                {habit.history.length} check-ins recorded
-              </p>
+              <div className='text-xs text-gray-500 dark:text-gray-400 flex flex-wrap gap-x-4'>
+                <span>{habit.history.length} check-ins recorded</span>
+                <span>Start: {formatDate(habit.startOn)}</span>
+                {habit.endOn && <span>End: {formatDate(habit.endOn)}</span>}
+              </div>
               <div className='mt-1 flex flex-wrap gap-1'>
                 {habit.history.slice(-5).map((date, i) => (
                   <Badge key={i} variant='default'>

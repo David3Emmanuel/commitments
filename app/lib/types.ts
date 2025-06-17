@@ -10,6 +10,8 @@ export type Habit = {
   title: string
   schedule: 'daily' | 'weekly' | 'monthly'
   history: Date[]
+  startOn: Date
+  endOn?: Date | null
 }
 
 export type Note = {
@@ -27,6 +29,8 @@ export type Event = {
   description?: string
   reminderTime?: Date
   isAllDay: boolean
+  schedule?: 'daily' | 'weekly' | 'monthly'
+  endOn?: Date | null // Only relevant for recurring events
 }
 
 export type Commitment = {

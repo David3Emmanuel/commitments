@@ -65,16 +65,30 @@ export const getTimeBasedEntitiesByUrgency = (
   const timeBasedEntities: TimeBasedEntity[] = []
   const today = new Date()
   today.setHours(0, 0, 0, 0)
-
   // Add events
   commitment.events.forEach((event) => {
-    timeBasedEntities.push({
-      id: event.id,
-      title: event.title,
-      date: new Date(event.date),
-      type: 'event',
-      originalEntity: event,
-    })
+    if (event.schedule) {
+      // For recurring events, use the next occurrence
+      const nextDate = getNextEventDate(event, today)
+      if (nextDate) {
+        timeBasedEntities.push({
+          id: event.id,
+          title: event.title,
+          date: nextDate,
+          type: 'event',
+          originalEntity: event,
+        })
+      }
+    } else {
+      // For one-time events
+      timeBasedEntities.push({
+        id: event.id,
+        title: event.title,
+        date: new Date(event.date),
+        type: 'event',
+        originalEntity: event,
+      })
+    }
   })
 
   // Add tasks with deadlines
@@ -121,10 +135,24 @@ export const getTimeBasedEntitiesByUrgency = (
 
 /**
  * Helper function to determine when a habit is next due
+ * @returns Date object representing the next due date, or null if there is no valid next date
  */
-export const getNextHabitDate = (habit: Habit, fromDate: Date): Date => {
+export const getNextHabitDate = (habit: Habit, fromDate: Date): Date | null => {
   const today = new Date(fromDate)
   today.setHours(0, 0, 0, 0)
+
+  // Check if habit has not yet started or has already ended
+  if (habit.startOn && new Date(habit.startOn) > today) {
+    // Habit hasn't started yet, return start date
+    return new Date(habit.startOn)
+  }
+
+  if (habit.endOn && new Date(habit.endOn) < today) {
+    // Habit has already ended, return null instead of today
+    return null
+  }
+
+  // Habit always has a schedule, so no need to check for its existence
 
   // Convert history dates to start of day for comparison
   const completedDates = habit.history.map((date) => {
@@ -146,6 +174,12 @@ export const getNextHabitDate = (habit: Habit, fromDate: Date): Date => {
       }
       // Otherwise due tomorrow
       nextDate.setDate(nextDate.getDate() + 1)
+
+      // Check if this would go past the end date
+      if (habit.endOn && nextDate > new Date(habit.endOn)) {
+        return null
+      }
+
       return nextDate
 
     case 'weekly':
@@ -165,6 +199,12 @@ export const getNextHabitDate = (habit: Habit, fromDate: Date): Date => {
 
       // Due next week, same day
       nextDate.setDate(nextDate.getDate() + (7 - nextDate.getDay()))
+
+      // Check if this would go past the end date
+      if (habit.endOn && nextDate > new Date(habit.endOn)) {
+        return null
+      }
+
       return nextDate
 
     case 'monthly':
@@ -182,8 +222,91 @@ export const getNextHabitDate = (habit: Habit, fromDate: Date): Date => {
 
       // Due next month, same day of month or last day if overflow
       nextDate.setMonth(nextDate.getMonth() + 1)
+
+      // Check if this would go past the end date
+      if (habit.endOn && nextDate > new Date(habit.endOn)) {
+        return null
+      }
+
       return nextDate
+
+    default:
+      // Unknown schedule type
+      return null
   }
+}
+
+/**
+ * Helper function to determine the next occurrence of a recurring event
+ */
+export const getNextEventDate = (event: Event, fromDate: Date): Date | null => {
+  const today = new Date(fromDate)
+  today.setHours(0, 0, 0, 0)
+
+  // If it's not a recurring event or if it has an end date that's already passed
+  if (!event.schedule || (event.endOn && new Date(event.endOn) < today)) {
+    return null
+  }
+
+  // The event's original date
+  const eventDate = new Date(event.date)
+  eventDate.setHours(0, 0, 0, 0)
+
+  // If the original date is in the future, return that
+  if (eventDate >= today) {
+    return eventDate
+  }
+
+  // Calculate next occurrence based on schedule
+  const nextDate = new Date(eventDate)
+  let currentDate = new Date(nextDate)
+
+  // Find the next occurrence after today
+  switch (event.schedule) {
+    case 'daily':
+      // Calculate how many days to add to reach or exceed today
+      const daysDiff = Math.ceil(
+        (today.getTime() - eventDate.getTime()) / (24 * 60 * 60 * 1000),
+      )
+      nextDate.setDate(nextDate.getDate() + daysDiff)
+      break
+
+    case 'weekly':
+      // Move forward a week at a time until we reach or exceed today
+      while (currentDate < today) {
+        currentDate.setDate(currentDate.getDate() + 7)
+      }
+      nextDate.setTime(currentDate.getTime())
+      break
+
+    case 'monthly':
+      // Move forward a month at a time until we reach or exceed today
+      while (currentDate < today) {
+        const targetMonth = currentDate.getMonth() + 1
+        const targetYear =
+          currentDate.getFullYear() + (targetMonth === 12 ? 1 : 0)
+        const normalizedMonth = targetMonth % 12
+
+        // Handle month changes and day-of-month issues
+        currentDate.setFullYear(targetYear, normalizedMonth, 1)
+
+        // Try to maintain the same day of month, but handle shorter months
+        const targetDay = Math.min(
+          eventDate.getDate(),
+          new Date(targetYear, normalizedMonth + 1, 0).getDate(), // Last day of target month
+        )
+        currentDate.setDate(targetDay)
+      }
+      nextDate.setTime(currentDate.getTime())
+      break
+  }
+
+  // Check if the next date exceeds the end date
+  if (event.endOn && nextDate > new Date(event.endOn)) {
+    return null
+  }
+
+  return nextDate
 }
 
 /**

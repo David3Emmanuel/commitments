@@ -50,7 +50,9 @@ export function CommitmentProvider({ children }: { children: ReactNode }) {
             key === 'dueAt' ||
             key === 'timestamp' ||
             key === 'date' ||
-            key === 'reminderTime'
+            key === 'reminderTime' ||
+            key === 'endOn' ||
+            key === 'startOn'
           ) {
             return value ? new Date(value) : null
           }

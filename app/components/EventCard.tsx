@@ -32,6 +32,13 @@ export function EventCard({ event, onClick }: EventCardProps) {
           {event.location && (
             <div className='text-sm mt-1'>📍 {event.location}</div>
           )}
+          {event.schedule && (
+            <div className='text-sm text-gray-500 dark:text-gray-400 mt-1'>
+              🔁 Repeats {event.schedule}
+              {event.endOn &&
+                ` until ${new Date(event.endOn).toLocaleDateString()}`}
+            </div>
+          )}
         </div>
         <div>
           {new Date(event.date) >= today && (

@@ -173,11 +173,28 @@ export function useCommitmentDetail(id: string | undefined) {
 
     if (!schedule) return
 
+    // Get start date with today's date as default
+    const today = new Date().toISOString().split('T')[0]
+    const startDateStr = await showDateModal(
+      'When do you want to start this habit?',
+      today,
+    )
+
+    if (!startDateStr) return
+
+    // Get optional end date
+    const endDateStr = await showDateModal(
+      'When do you want to end this habit? (Optional - click Cancel for no end date)',
+      '',
+    )
+
     const newHabit: Habit = {
       id: `habit-${Date.now()}`,
       title: newHabitTitle,
       schedule: schedule as 'daily' | 'weekly' | 'monthly',
       history: [],
+      startOn: new Date(startDateStr),
+      endOn: endDateStr ? new Date(endDateStr) : null,
     }
 
     const updatedCommitment = {
@@ -219,12 +236,36 @@ export function useCommitmentDetail(id: string | undefined) {
 
     if (!schedule) return
 
+    // Edit start date
+    const currentStartDate = habit.startOn
+      ? new Date(habit.startOn).toISOString().split('T')[0]
+      : new Date().toISOString().split('T')[0]
+
+    const startDateStr = await showDateModal(
+      'When do you want to start this habit?',
+      currentStartDate,
+    )
+
+    if (!startDateStr) return
+
+    // Edit optional end date
+    const currentEndDate = habit.endOn
+      ? new Date(habit.endOn).toISOString().split('T')[0]
+      : ''
+
+    const endDateStr = await showDateModal(
+      'When do you want to end this habit? (Optional - click Cancel for no end date)',
+      currentEndDate,
+    )
+
     const updatedHabits = commitment.subItems.habits.map((h) =>
       h.id === habitId
         ? {
             ...h,
             title: editedHabitTitle,
             schedule: schedule as 'daily' | 'weekly' | 'monthly',
+            startOn: new Date(startDateStr),
+            endOn: endDateStr ? new Date(endDateStr) : null,
           }
         : h,
     )
