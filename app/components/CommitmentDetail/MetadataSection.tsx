@@ -2,7 +2,7 @@ import {
   isReviewDue,
   getReviewFrequencyText,
   getNextReviewDate,
-} from '~/lib/detailFunctions'
+} from '~/lib/details'
 import type { Commitment } from '~/lib/types'
 
 export function MetadataSection({

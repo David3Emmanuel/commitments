@@ -6,8 +6,8 @@ import {
   compareEventsByUrgency,
   getEventUrgency,
   getUrgencyClass,
-} from '~/lib/sortUtils'
-import { getStartOfDay, getTomorrow } from '~/lib/dateUtils'
+} from '~/lib/sort'
+import { getStartOfDay, getTomorrow } from '~/lib/date'
 
 interface EventListProps {
   commitment: Commitment

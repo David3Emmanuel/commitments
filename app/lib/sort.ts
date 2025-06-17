@@ -3,8 +3,8 @@ import {
   getNextHabitDate,
   getNextReviewDate,
   getNextEventDate,
-} from './detailFunctions'
-import { getStartOfDay, isSameDay, getTomorrow } from './dateUtils'
+} from './details'
+import { getStartOfDay, isSameDay, getTomorrow } from './date'
 
 /**
  * Urgency levels for tasks, habits and events

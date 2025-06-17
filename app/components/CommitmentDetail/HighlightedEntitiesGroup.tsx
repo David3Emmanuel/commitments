@@ -1,4 +1,4 @@
-import type { TimeBasedEntity } from '~/lib/detailFunctions'
+import type { TimeBasedEntity } from '~/lib/details'
 import { HighlightedEntity } from './HighlightedEntity'
 import type { HighlightType } from './CommitmentDetails'
 

@@ -5,7 +5,7 @@ import {
   getCommitmentUrgency,
   getUrgencyClass,
   type UrgencyLevel,
-} from '~/lib/sortUtils'
+} from '~/lib/sort'
 
 interface CommitmentCardProps {
   commitment: Commitment

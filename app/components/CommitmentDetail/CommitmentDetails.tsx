@@ -2,9 +2,8 @@ import type { Commitment } from '~/lib/types'
 import {
   type TimeBasedEntity,
   getHighlightedTimeBasedEntities,
-} from '~/lib/detailFunctions'
+} from '~/lib/details'
 import type { TabType } from '~/hooks/useTabNavigation'
-import { Link } from 'react-router'
 import { HighlightedEntitiesGroup } from './HighlightedEntitiesGroup'
 import { MetadataSection } from './MetadataSection'
 
@@ -98,10 +97,6 @@ export default function CommitmentDetails({
         // Reviews are handled by the Link component in HighlightedEntity
         break
     }
-  }
-
-  const getReviewUrl = () => {
-    return `/commitments/${commitment.id}/review`
   }
 
   return (

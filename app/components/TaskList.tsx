@@ -6,7 +6,7 @@ import {
   compareTasksByUrgency,
   getTaskUrgency,
   getUrgencyClass,
-} from '~/lib/sortUtils'
+} from '~/lib/sort'
 
 interface TaskListProps {
   tasks: Task[]

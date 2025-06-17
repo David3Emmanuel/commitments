@@ -2,12 +2,12 @@ import type { Habit } from '~/lib/types'
 import { Badge, Button } from '~/components/ui'
 import { useModal } from '~/components/ui/Modal'
 import { HabitToggle } from '~/components/HabitToggle'
-import { isHabitActive } from '~/lib/habitUtils'
+import { isHabitActive } from '~/lib/habit'
 import {
   compareHabitsByUrgency,
   getHabitUrgency,
   getUrgencyClass,
-} from '~/lib/sortUtils'
+} from '~/lib/sort'
 
 interface HabitListProps {
   habits: Habit[]

@@ -1,4 +1,4 @@
-import type { TimeBasedEntity } from '~/lib/detailFunctions'
+import type { TimeBasedEntity } from '~/lib/details'
 import { Link } from 'react-router'
 import { getHighlightStyles, type HighlightType } from './CommitmentDetails'
 
