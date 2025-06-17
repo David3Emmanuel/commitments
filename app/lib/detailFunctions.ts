@@ -1,25 +1,24 @@
 import type { Commitment, Event, Habit, Task } from './types'
 
 export const getNextReviewDate = (commitment: Commitment): Date => {
-  if (!commitment.lastReviewedAt) {
-    return new Date() // If never reviewed, it's due now
-  }
+  // Use either last review date or today's date as the base
+  const baseDate = commitment.lastReviewedAt
+    ? new Date(commitment.lastReviewedAt)
+    : new Date()
+  const nextReview = new Date(baseDate)
 
-  const lastReview = new Date(commitment.lastReviewedAt)
-  const nextReview = new Date(lastReview)
+  // Calculate the interval based on review frequency
+  let intervalDays = 7 // Default to weekly
 
   if (
     commitment.reviewFrequency.type === 'interval' &&
     commitment.reviewFrequency.intervalDays
   ) {
-    nextReview.setDate(
-      nextReview.getDate() + commitment.reviewFrequency.intervalDays,
-    )
-  } else {
-    // For custom schedules, we'd need proper cron parsing
-    // For now just default to weekly
-    nextReview.setDate(nextReview.getDate() + 7)
+    intervalDays = commitment.reviewFrequency.intervalDays
   }
+
+  // Add the interval to the base date
+  nextReview.setDate(nextReview.getDate() + intervalDays)
 
   return nextReview
 }

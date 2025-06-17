@@ -14,6 +14,8 @@ export default function CommitmentHeader({
   formatDate,
   handleArchiveToggle,
 }: CommitmentHeaderProps) {
+  const reviewIsDue = isReviewDue(commitment)
+
   return (
     <div className='p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700'>
       <div className='flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4'>
@@ -57,26 +59,28 @@ export default function CommitmentHeader({
             </svg>
             Edit
           </Link>
-          {isReviewDue(commitment) && (
-            <Link
-              to={`/commitments/${commitment.id}/review`}
-              className='px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 flex items-center'
+          <Link
+            to={`/commitments/${commitment.id}/review`}
+            className={`px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-md flex items-center ${
+              reviewIsDue
+                ? 'bg-blue-600 text-white hover:bg-blue-700'
+                : 'border border-blue-300 dark:border-blue-700 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30'
+            }`}
+          >
+            <svg
+              xmlns='http://www.w3.org/2000/svg'
+              className='h-3 w-3 sm:h-4 sm:w-4 mr-1'
+              viewBox='0 0 20 20'
+              fill='currentColor'
             >
-              <svg
-                xmlns='http://www.w3.org/2000/svg'
-                className='h-3 w-3 sm:h-4 sm:w-4 mr-1'
-                viewBox='0 0 20 20'
-                fill='currentColor'
-              >
-                <path
-                  fillRule='evenodd'
-                  d='M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 10-1.414-1.414L11 10.586V7z'
-                  clipRule='evenodd'
-                />
-              </svg>
-              Review Now
-            </Link>
-          )}
+              <path
+                fillRule='evenodd'
+                d='M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 10-1.414-1.414L11 10.586V7z'
+                clipRule='evenodd'
+              />
+            </svg>
+            {reviewIsDue ? 'Review Now' : 'Review'}
+          </Link>
           <button
             onClick={handleArchiveToggle}
             className='px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-md border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center'
