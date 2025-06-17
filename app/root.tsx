@@ -6,12 +6,12 @@ import {
   Scripts,
   ScrollRestoration,
 } from 'react-router'
-
 import type { Route } from './+types/root'
 import { CommitmentProvider } from './contexts/CommitmentContext'
 import { ToastProvider } from './components/ui/Toast'
 import { ModalProvider } from './components/ui/Modal'
 import './app.css'
+import { useRegisterSW } from './hooks/useRegisterSW'
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -24,6 +24,8 @@ export const links: Route.LinksFunction = () => [
     rel: 'stylesheet',
     href: 'https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap',
   },
+  { rel: 'manifest', href: '/manifest.json' },
+  { rel: 'apple-touch-icon', href: '/pwa-assets/icon-192x192.png' },
 ]
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -32,6 +34,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet='utf-8' />
         <meta name='viewport' content='width=device-width, initial-scale=1' />
+        <meta name='theme-color' content='#4f46e5' />
+        <meta name='apple-mobile-web-app-capable' content='yes' />
+        <meta name='application-name' content='Commitments' />
+        <meta name='apple-mobile-web-app-status-bar-style' content='default' />
+        <meta name='apple-mobile-web-app-title' content='Commitments' />
+        <meta
+          name='description'
+          content='Track and manage your commitments, habits, tasks, and events'
+        />
+        <meta name='format-detection' content='telephone=no' />
+        <meta name='mobile-web-app-capable' content='yes' />
+        <meta name='msapplication-TileColor' content='#4f46e5' />
         <Meta />
         <Links />
       </head>
@@ -45,6 +59,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  useRegisterSW()
+
   return (
     <ToastProvider>
       <ModalProvider>
