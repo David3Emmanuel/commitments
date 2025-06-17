@@ -71,7 +71,6 @@ export function CommitmentProvider({ children }: { children: ReactNode }) {
             habits: commitment.subItems?.habits || [],
             events: commitment.subItems?.events || [],
           },
-          history: commitment.history || [],
         }))
 
         setCommitments(validated)

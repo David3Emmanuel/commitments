@@ -1,4 +1,4 @@
-import type { Event, Habit, Task } from './types'
+import type { Event, Habit, Task, Commitment } from './types'
 import { getNextHabitDate } from './detailFunctions'
 import { getStartOfDay, isSameDay, getTomorrow } from './dateUtils'
 
@@ -214,4 +214,115 @@ export const compareEventsByUrgency = (
 
   // Otherwise sort by date (closest first)
   return new Date(a.date).getTime() - new Date(b.date).getTime()
+}
+
+/**
+ * Determines the urgency level of a commitment
+ * based on its most urgent items (tasks, habits, events) and review schedule
+ *
+ * @param commitment The commitment to evaluate
+ * @returns The urgency level of the commitment
+ */
+export const getCommitmentUrgency = (commitment: Commitment): UrgencyLevel => {
+  // Check if review is due
+  const isReviewDue = isReviewOverdue(commitment)
+
+  if (isReviewDue) {
+    return 'urgent'
+  }
+
+  // Check all tasks
+  const taskUrgencies = commitment.subItems.tasks.map(getTaskUrgency)
+
+  // Check all habits
+  const habitUrgencies = commitment.subItems.habits.map(getHabitUrgency)
+
+  // Check all events
+  const eventUrgencies = commitment.events.map(getEventUrgency)
+
+  // Combine all urgencies
+  const allUrgencies = [...taskUrgencies, ...habitUrgencies, ...eventUrgencies]
+
+  // Get the most urgent level
+  if (allUrgencies.includes('urgent')) return 'urgent'
+  if (allUrgencies.includes('upcoming')) return 'upcoming'
+  if (allUrgencies.includes('tomorrow')) return 'tomorrow'
+
+  return 'normal'
+}
+
+/**
+ * Checks if a commitment's review is overdue
+ *
+ * @param commitment The commitment to check
+ * @returns Whether the review is overdue
+ */
+export const isReviewOverdue = (commitment: Commitment): boolean => {
+  if (!commitment.lastReviewedAt) {
+    return true // If never reviewed, it's due now
+  }
+
+  const lastReview = new Date(commitment.lastReviewedAt)
+  const nextReview = new Date(lastReview)
+
+  if (
+    commitment.reviewFrequency.type === 'interval' &&
+    commitment.reviewFrequency.intervalDays
+  ) {
+    nextReview.setDate(
+      nextReview.getDate() + commitment.reviewFrequency.intervalDays,
+    )
+  } else {
+    // For custom schedules, default to weekly
+    nextReview.setDate(nextReview.getDate() + 7)
+  }
+
+  return nextReview <= new Date()
+}
+
+/**
+ * Compares two commitments by urgency
+ *
+ * @param a First commitment
+ * @param b Second commitment
+ * @returns Comparison result (-1, 0, or 1)
+ */
+export const compareCommitmentsByUrgency = (
+  a: Commitment,
+  b: Commitment,
+): number => {
+  // Get urgency levels
+  const aUrgency = getCommitmentUrgency(a)
+  const bUrgency = getCommitmentUrgency(b)
+
+  // Define priority order for urgency levels
+  const urgencyOrder: Record<UrgencyLevel, number> = {
+    urgent: 0,
+    upcoming: 1,
+    tomorrow: 2,
+    normal: 3,
+  }
+
+  // Compare by urgency level
+  if (aUrgency !== bUrgency) {
+    return urgencyOrder[aUrgency] - urgencyOrder[bUrgency]
+  }
+
+  // If same urgency, check if any has an overdue review
+  const aReviewDue = isReviewOverdue(a)
+  const bReviewDue = isReviewOverdue(b)
+
+  if (aReviewDue !== bReviewDue) {
+    return aReviewDue ? -1 : 1
+  }
+
+  // Otherwise sort by the date (most recently updated first)
+  if (a.lastReviewedAt && b.lastReviewedAt) {
+    return (
+      new Date(b.lastReviewedAt).getTime() -
+      new Date(a.lastReviewedAt).getTime()
+    )
+  }
+
+  return 0
 }

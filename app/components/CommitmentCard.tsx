@@ -1,6 +1,11 @@
 import { Link } from 'react-router'
 import type { Commitment, Task } from '~/lib/types'
 import { Badge, ProgressBar } from '~/components/ui'
+import {
+  getCommitmentUrgency,
+  getUrgencyClass,
+  type UrgencyLevel,
+} from '~/lib/sortUtils'
 
 interface CommitmentCardProps {
   commitment: Commitment
@@ -43,22 +48,46 @@ export function CommitmentCard({ commitment }: CommitmentCardProps) {
     const completedTasks = tasks.filter((task) => task.completed).length
     return Math.round((completedTasks / tasks.length) * 100)
   }
-
   const nextReviewDate = getNextReviewDate(commitment)
   const taskCompletion = getTaskCompletionPercentage(commitment.subItems.tasks)
   const overdueStatus = isOverdue(nextReviewDate)
+  const urgency = getCommitmentUrgency(commitment)
+  const urgencyClass = getUrgencyClass(urgency)
+
+  // Get urgency label
+  const getUrgencyLabel = (level: UrgencyLevel): string => {
+    switch (level) {
+      case 'urgent':
+        return 'Urgent'
+      case 'upcoming':
+        return 'Due Today'
+      case 'tomorrow':
+        return 'Due Tomorrow'
+      default:
+        return overdueStatus ? 'Review Due' : 'On Track'
+    }
+  }
+
   return (
     <Link
       key={commitment.id}
       to={`/commitments/${commitment.id}`}
-      className='border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:shadow-md transition-shadow'
+      className={`border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:shadow-md transition-shadow ${urgencyClass}`}
     >
       <div className='flex justify-between items-start mb-4'>
         <h2 className='text-xl font-medium text-gray-900 dark:text-white'>
           {commitment.title}
-        </h2>
-        <Badge variant={overdueStatus ? 'danger' : 'success'}>
-          {overdueStatus ? 'Review Due' : 'On Track'}
+        </h2>{' '}
+        <Badge
+          variant={
+            urgency === 'urgent' || overdueStatus
+              ? 'danger'
+              : urgency === 'upcoming'
+              ? 'warning'
+              : 'success'
+          }
+        >
+          {getUrgencyLabel(urgency)}
         </Badge>
       </div>
 

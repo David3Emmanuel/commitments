@@ -4,6 +4,7 @@ import type { Route } from './+types/dashboard'
 import { CommitmentCard } from '~/components/CommitmentCard'
 import { Button, Tabs } from '~/components/ui'
 import { useCommitments } from '~/contexts/CommitmentContext'
+import { compareCommitmentsByUrgency } from '~/lib/sortUtils'
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -16,9 +17,10 @@ export default function Dashboard() {
   const { isLoading, getActiveCommitments, getArchivedCommitments } =
     useCommitments()
   const [viewMode, setViewMode] = useState<'active' | 'archived'>('active')
-
-  const filteredCommitments =
+  // Get commitments and sort by urgency
+  const filteredCommitments = (
     viewMode === 'active' ? getActiveCommitments() : getArchivedCommitments()
+  ).sort(compareCommitmentsByUrgency)
 
   const renderCommitments = () => {
     if (isLoading) {
