@@ -56,11 +56,16 @@ export default function Dashboard() {
   return (
     <div className='container mx-auto px-4 py-8'>
       <div className='flex justify-between items-center mb-8'>
-        <h1 className='text-3xl font-bold text-gray-900 dark:text-white'>
+        <h1 className='text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white'>
           Commitments Dashboard
         </h1>
         <Link to='/commitments/new'>
-          <Button variant='primary'>New Commitment</Button>
+          <Button variant='primary' className='max-sm:hidden'>
+            New Commitment
+          </Button>
+          <Button variant='primary' className='sm:hidden'>
+            New
+          </Button>
         </Link>
       </div>
 
