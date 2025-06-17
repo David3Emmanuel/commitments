@@ -4,6 +4,7 @@ import {
   getHighlightedTimeBasedEntities,
 } from '~/lib/detailFunctions'
 import type { TabType } from '~/hooks/useTabNavigation'
+import { Link } from 'react-router'
 import { HighlightedEntitiesGroup } from './HighlightedEntitiesGroup'
 import { MetadataSection } from './MetadataSection'
 
@@ -94,8 +95,13 @@ export default function CommitmentDetails({
         onNavigateToTab('events')
         break
       case 'review':
+        // Reviews are handled by the Link component in HighlightedEntity
         break
     }
+  }
+
+  const getReviewUrl = () => {
+    return `/commitments/${commitment.id}/review`
   }
 
   return (
@@ -107,6 +113,7 @@ export default function CommitmentDetails({
           formatDateWithTime={formatDateWithTime}
           onEntityClick={handleEntityClick}
           canNavigate={!!onNavigateToTab}
+          commitmentId={commitment.id}
         />
       ))}
       <DescriptionSection description={commitment.description} />

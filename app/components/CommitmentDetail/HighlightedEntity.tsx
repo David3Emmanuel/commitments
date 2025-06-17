@@ -1,4 +1,5 @@
 import type { TimeBasedEntity } from '~/lib/detailFunctions'
+import { Link } from 'react-router'
 import { getHighlightStyles, type HighlightType } from './CommitmentDetails'
 
 interface HighlightedEntityProps {
@@ -7,6 +8,7 @@ interface HighlightedEntityProps {
   formatDateWithTime: (entity: TimeBasedEntity) => string
   onEntityClick: (entity: TimeBasedEntity) => void
   canNavigate: boolean
+  commitmentId: string
 }
 
 export function HighlightedEntity({
@@ -15,16 +17,37 @@ export function HighlightedEntity({
   formatDateWithTime,
   onEntityClick,
   canNavigate,
+  commitmentId,
 }: HighlightedEntityProps) {
   const styles = getHighlightStyles(highlightType)
-  const isClickable = canNavigate && entity.type !== 'review'
+  const isReview = entity.type === 'review'
+
+  if (isReview) {
+    return (
+      <Link
+        to={`/commitments/${commitmentId}/review`}
+        className={`block p-4 rounded-lg mb-2 ${styles.background} cursor-pointer hover:bg-opacity-90`}
+      >
+        <h3 className='font-medium mb-1 flex items-center'>
+          <span className={`mr-2 ${styles.text}`}>{styles.icon}</span>
+          <span className='text-gray-800 dark:text-gray-200'>
+            {entity.title}
+          </span>
+        </h3>
+        <p className={`text-sm ${styles.text}`}>
+          Due: {formatDateWithTime(entity)}
+          <span className='ml-2 underline'>Click to review</span>
+        </p>
+      </Link>
+    )
+  }
 
   return (
     <div
       className={`p-4 rounded-lg mb-2 ${styles.background} ${
-        isClickable ? 'cursor-pointer hover:bg-opacity-90' : ''
+        canNavigate ? 'cursor-pointer hover:bg-opacity-90' : ''
       }`}
-      onClick={() => isClickable && onEntityClick(entity)}
+      onClick={() => canNavigate && onEntityClick(entity)}
     >
       <h3 className='font-medium mb-1 flex items-center'>
         <span className={`mr-2 ${styles.text}`}>{styles.icon}</span>
@@ -32,7 +55,7 @@ export function HighlightedEntity({
       </h3>
       <p className={`text-sm ${styles.text}`}>
         Due: {formatDateWithTime(entity)}
-        {isClickable && <span className='ml-2 underline'>Click to view</span>}
+        {canNavigate && <span className='ml-2 underline'>Click to view</span>}
       </p>
     </div>
   )
