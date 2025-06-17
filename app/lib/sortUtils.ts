@@ -1,5 +1,5 @@
 import type { Event, Habit, Task, Commitment } from './types'
-import { getNextHabitDate } from './detailFunctions'
+import { getNextHabitDate, getNextReviewDate } from './detailFunctions'
 import { getStartOfDay, isSameDay, getTomorrow } from './dateUtils'
 
 /**
@@ -258,25 +258,7 @@ export const getCommitmentUrgency = (commitment: Commitment): UrgencyLevel => {
  * @returns Whether the review is overdue
  */
 export const isReviewOverdue = (commitment: Commitment): boolean => {
-  if (!commitment.lastReviewedAt) {
-    return true // If never reviewed, it's due now
-  }
-
-  const lastReview = new Date(commitment.lastReviewedAt)
-  const nextReview = new Date(lastReview)
-
-  if (
-    commitment.reviewFrequency.type === 'interval' &&
-    commitment.reviewFrequency.intervalDays
-  ) {
-    nextReview.setDate(
-      nextReview.getDate() + commitment.reviewFrequency.intervalDays,
-    )
-  } else {
-    // For custom schedules, default to weekly
-    nextReview.setDate(nextReview.getDate() + 7)
-  }
-
+  const nextReview = getNextReviewDate(commitment)
   return nextReview <= new Date()
 }
 

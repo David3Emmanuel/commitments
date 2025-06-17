@@ -48,6 +48,7 @@ export function CommitmentCard({ commitment }: CommitmentCardProps) {
     const completedTasks = tasks.filter((task) => task.completed).length
     return Math.round((completedTasks / tasks.length) * 100)
   }
+
   const nextReviewDate = getNextReviewDate(commitment)
   const taskCompletion = getTaskCompletionPercentage(commitment.subItems.tasks)
   const overdueStatus = isOverdue(nextReviewDate)
@@ -77,7 +78,7 @@ export function CommitmentCard({ commitment }: CommitmentCardProps) {
       <div className='flex justify-between items-start mb-4'>
         <h2 className='text-xl font-medium text-gray-900 dark:text-white'>
           {commitment.title}
-        </h2>{' '}
+        </h2>
         <Badge
           variant={
             urgency === 'urgent' || overdueStatus
