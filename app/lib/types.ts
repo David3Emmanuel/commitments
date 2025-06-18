@@ -43,6 +43,7 @@ export type Commitment = {
     intervalDays?: number
     customCron?: string
   }
+  firstReviewDate?: Date | null
   lastReviewedAt: Date | null
   subItems: {
     tasks: Task[]

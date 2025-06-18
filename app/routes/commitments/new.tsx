@@ -25,6 +25,7 @@ export default function NewCommitment() {
   )
   const [intervalDays, setIntervalDays] = useState<number>(7)
   const [customCron, setCustomCron] = useState<string>('')
+  const [firstReviewDate, setFirstReviewDate] = useState<Date | null>(null)
   const { showToast } = useToast()
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -42,6 +43,7 @@ export default function NewCommitment() {
         type: reviewType,
         ...(reviewType === 'interval' ? { intervalDays } : { customCron }),
       },
+      firstReviewDate: firstReviewDate,
       lastReviewedAt: null,
       subItems: {
         tasks: [],
@@ -63,6 +65,10 @@ export default function NewCommitment() {
       // Show an error toast notification
       showToast('Failed to save commitment. Please try again.', 'error')
     }
+  }
+
+  const formatDateForInput = (date: Date) => {
+    return date.toISOString().split('T')[0]
   }
 
   return (
@@ -145,6 +151,27 @@ export default function NewCommitment() {
                     />
                   </div>
                 )}
+              </div>
+            </div>
+
+            <div>
+              <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+                First Review Date (optional)
+              </label>
+              <div className='mt-1'>
+                <TextInput
+                  id='firstReviewDate'
+                  type='date'
+                  value={
+                    firstReviewDate ? formatDateForInput(firstReviewDate) : ''
+                  }
+                  onChange={(e) =>
+                    setFirstReviewDate(
+                      e.target.value ? new Date(e.target.value) : null,
+                    )
+                  }
+                  helper='If left blank, reviews will start from today'
+                />
               </div>
             </div>
 

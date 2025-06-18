@@ -1,10 +1,15 @@
 import type { Commitment, Event, Habit, Task } from './types'
 
 export const getNextReviewDate = (commitment: Commitment): Date => {
-  // Use either last review date or today's date as the base
-  const baseDate = commitment.lastReviewedAt
-    ? new Date(commitment.lastReviewedAt)
-    : new Date()
+  let baseDate: Date
+  if (commitment.lastReviewedAt) {
+    baseDate = new Date(commitment.lastReviewedAt)
+  } else if (commitment.firstReviewDate) {
+    baseDate = new Date(commitment.firstReviewDate)
+  } else {
+    baseDate = new Date()
+  }
+
   const nextReview = new Date(baseDate)
 
   // Calculate the interval based on review frequency

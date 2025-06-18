@@ -30,6 +30,7 @@ export default function EditCommitment() {
   )
   const [intervalDays, setIntervalDays] = useState<number>(7)
   const [customCron, setCustomCron] = useState<string>('')
+  const [firstReviewDate, setFirstReviewDate] = useState<Date | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [originalCommitment, setOriginalCommitment] =
@@ -47,11 +48,11 @@ export default function EditCommitment() {
       try {
         const commitment = getCommitment(id)
         if (commitment) {
-          setOriginalCommitment(commitment)
-          // Initialize form fields
+          setOriginalCommitment(commitment) // Initialize form fields
           setTitle(commitment.title)
           setDescription(commitment.description)
           setReviewType(commitment.reviewFrequency.type)
+          setFirstReviewDate(commitment.firstReviewDate || null)
           if (commitment.reviewFrequency.type === 'interval') {
             setIntervalDays(commitment.reviewFrequency.intervalDays || 7)
           } else {
@@ -87,6 +88,7 @@ export default function EditCommitment() {
         type: reviewType,
         ...(reviewType === 'interval' ? { intervalDays } : { customCron }),
       },
+      firstReviewDate: firstReviewDate,
     }
 
     // Save to context
@@ -213,6 +215,34 @@ export default function EditCommitment() {
                   </div>
                 )}
               </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor='firstReviewDate'
+                className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'
+              >
+                First Review Date
+              </label>
+              <input
+                type='date'
+                id='firstReviewDate'
+                value={
+                  firstReviewDate
+                    ? firstReviewDate.toISOString().split('T')[0]
+                    : ''
+                }
+                onChange={(e) => {
+                  const newDate = e.target.value
+                    ? new Date(e.target.value)
+                    : null
+                  setFirstReviewDate(newDate)
+                }}
+                className='block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-white'
+              />
+              <p className='mt-1 text-sm text-gray-500 dark:text-gray-400'>
+                When should the first review of this commitment happen?
+              </p>
             </div>
 
             <div className='flex items-center justify-end space-x-3 pt-4'>
