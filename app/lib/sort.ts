@@ -12,6 +12,16 @@ import { getStartOfDay, isSameDay, getTomorrow } from './date'
 export type UrgencyLevel = 'urgent' | 'upcoming' | 'tomorrow' | 'normal'
 
 /**
+ * Priority order for urgency levels (lower number = higher priority)
+ */
+export const URGENCY_ORDER: Record<UrgencyLevel, number> = {
+  urgent: 0,
+  upcoming: 1,
+  tomorrow: 2,
+  normal: 3,
+}
+
+/**
  * Determines the urgency level of a task
  *
  * @param task The task to evaluate
@@ -134,17 +144,9 @@ export const compareTasksByUrgency = (a: Task, b: Task): number => {
   const aUrgency = getTaskUrgency(a)
   const bUrgency = getTaskUrgency(b)
 
-  // Define priority order for urgency levels
-  const urgencyOrder: Record<UrgencyLevel, number> = {
-    urgent: 0,
-    upcoming: 1,
-    tomorrow: 2,
-    normal: 3,
-  }
-
   // Compare by urgency level
   if (aUrgency !== bUrgency) {
-    return urgencyOrder[aUrgency] - urgencyOrder[bUrgency]
+    return URGENCY_ORDER[aUrgency] - URGENCY_ORDER[bUrgency]
   }
 
   // If both have due dates, sort by earliest
@@ -210,17 +212,9 @@ export const compareHabitsByUrgency = (a: Habit, b: Habit): number => {
   const aUrgency = getHabitUrgency(a)
   const bUrgency = getHabitUrgency(b)
 
-  // Define priority order for urgency levels
-  const urgencyOrder: Record<UrgencyLevel, number> = {
-    urgent: 0,
-    upcoming: 1,
-    tomorrow: 2,
-    normal: 3,
-  }
-
   // Compare by urgency level
   if (aUrgency !== bUrgency) {
-    return urgencyOrder[aUrgency] - urgencyOrder[bUrgency]
+    return URGENCY_ORDER[aUrgency] - URGENCY_ORDER[bUrgency]
   }
 
   const aNextDate = getNextHabitDate(a, today)
@@ -267,17 +261,9 @@ export const compareEventsByUrgency = (
   const aUrgency = getEventUrgency(a)
   const bUrgency = getEventUrgency(b)
 
-  // Define priority order for urgency levels
-  const urgencyOrder: Record<UrgencyLevel, number> = {
-    urgent: 0,
-    upcoming: 1,
-    tomorrow: 2,
-    normal: 3,
-  }
-
   // Compare by urgency level
   if (aUrgency !== bUrgency) {
-    return urgencyOrder[aUrgency] - urgencyOrder[bUrgency]
+    return URGENCY_ORDER[aUrgency] - URGENCY_ORDER[bUrgency]
   }
 
   // Otherwise sort by date (closest first)
@@ -345,17 +331,9 @@ export const compareCommitmentsByUrgency = (
   const aUrgency = getCommitmentUrgency(a)
   const bUrgency = getCommitmentUrgency(b)
 
-  // Define priority order for urgency levels
-  const urgencyOrder: Record<UrgencyLevel, number> = {
-    urgent: 0,
-    upcoming: 1,
-    tomorrow: 2,
-    normal: 3,
-  }
-
   // Compare by urgency level
   if (aUrgency !== bUrgency) {
-    return urgencyOrder[aUrgency] - urgencyOrder[bUrgency]
+    return URGENCY_ORDER[aUrgency] - URGENCY_ORDER[bUrgency]
   }
 
   // If same urgency, check if any has an overdue review
