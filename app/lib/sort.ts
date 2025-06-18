@@ -3,6 +3,7 @@ import {
   getNextHabitDate,
   getNextReviewDate,
   getNextEventDate,
+  getTimeBasedEntitiesByUrgency,
 } from './details'
 import { getStartOfDay, isSameDay, getTomorrow } from './date'
 
@@ -336,7 +337,20 @@ export const compareCommitmentsByUrgency = (
     return URGENCY_ORDER[aUrgency] - URGENCY_ORDER[bUrgency]
   }
 
-  // If same urgency, check if any has an overdue review
+  // Get the most urgent dates for both commitments
+  const aMostUrgentDate = getMostUrgentDate(a)
+  const bMostUrgentDate = getMostUrgentDate(b)
+
+  // If both have urgent dates, compare those dates (closest first)
+  if (aMostUrgentDate && bMostUrgentDate) {
+    return aMostUrgentDate.getTime() - bMostUrgentDate.getTime()
+  }
+
+  // If only one has an urgent date, that one comes first
+  if (aMostUrgentDate) return -1
+  if (bMostUrgentDate) return 1
+
+  // If no urgent dates, check if any has an overdue review
   const aReviewDue = isReviewOverdue(a)
   const bReviewDue = isReviewOverdue(b)
 
@@ -353,4 +367,17 @@ export const compareCommitmentsByUrgency = (
   }
 
   return 0
+}
+
+/**
+ * Gets the date of the most urgent item in a commitment
+ *
+ * @param commitment The commitment
+ * @returns The date of the most urgent item or null if no items
+ */
+export const getMostUrgentDate = (commitment: Commitment): Date | null => {
+  const timeBasedEntities = getTimeBasedEntitiesByUrgency(commitment)
+
+  if (timeBasedEntities.length === 0) return null
+  return timeBasedEntities[0].date
 }
