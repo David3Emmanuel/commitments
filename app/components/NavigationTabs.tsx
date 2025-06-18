@@ -27,6 +27,7 @@ export default function NavigationTabs({
       tabs={tabs}
       activeTab={activeTab}
       onTabChange={(tabId) => onTabChange(tabId as TabType)}
+      syncWithUrl
     />
   )
 }

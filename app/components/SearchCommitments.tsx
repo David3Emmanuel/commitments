@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router'
+import { Link } from 'react-router'
 import type { Commitment, Habit, Task, Note, Event } from '~/lib/types'
 import { searchCommitments } from '~/lib/search'
 import { TextInput } from './ui'
@@ -16,7 +16,6 @@ export function SearchCommitments({ className = '' }: SearchCommitmentsProps) {
   >([])
   const [isSearching, setIsSearching] = useState(false)
   const { commitments } = useCommitments()
-  const navigate = useNavigate()
 
   const handleSearch = (searchQuery: string) => {
     setQuery(searchQuery)
@@ -31,10 +30,6 @@ export function SearchCommitments({ className = '' }: SearchCommitmentsProps) {
     const results = searchCommitments(commitments, searchQuery)
     setSearchResults(results)
     setIsSearching(false)
-  }
-
-  const handleResultClick = (commitmentId: string) => {
-    navigate(`/commitments/${commitmentId}`)
   }
 
   return (
@@ -103,14 +98,25 @@ export function SearchCommitments({ className = '' }: SearchCommitmentsProps) {
                   <li
                     key={`${result.itemType}-${result.item.id}`}
                     className='p-3 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer'
-                    onClick={() => handleResultClick(result.commitmentId)}
                   >
-                    <div className='font-medium'>{title}</div>
-                    <div className='text-sm text-gray-500 dark:text-gray-400 flex items-center'>
-                      <span className='bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded text-xs mr-2'>
-                        {subtitle}
-                      </span>
-                    </div>
+                    <Link
+                      to={`/commitments/${result.commitmentId}?tab=${
+                        {
+                          commitment: 'details',
+                          task: 'tasks',
+                          habit: 'habits',
+                          note: 'notes',
+                          event: 'events',
+                        }[result.itemType] || 'details'
+                      }`}
+                    >
+                      <div className='font-medium'>{title}</div>
+                      <div className='text-sm text-gray-500 dark:text-gray-400 flex items-center'>
+                        <span className='bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded text-xs mr-2'>
+                          {subtitle}
+                        </span>
+                      </div>
+                    </Link>
                   </li>
                 )
               })}
