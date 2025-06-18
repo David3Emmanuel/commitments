@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router'
 import type { Route } from './+types/dashboard'
-import { CommitmentCard } from '~/components/CommitmentCard'
+import { CommitmentList } from '~/components/CommitmentList'
 import { Button, Tabs } from '~/components/ui'
 import { SearchCommitments } from '~/components/SearchCommitments'
 import { useCommitments } from '~/contexts/CommitmentContext'
@@ -23,22 +23,6 @@ export default function Dashboard() {
     viewMode === 'active' ? getActiveCommitments() : getArchivedCommitments()
   ).sort(compareCommitmentsByUrgency)
 
-  const renderCommitments = () => {
-    if (isLoading) {
-      return <div className='text-center py-12'>Loading commitments...</div>
-    }
-
-    if (filteredCommitments.length === 0)
-      return <NoCommitmentsMessage viewMode={viewMode} />
-
-    return (
-      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-        {filteredCommitments.map((commitment) => (
-          <CommitmentCard key={commitment.id} commitment={commitment} />
-        ))}
-      </div>
-    )
-  }
   return (
     <div className='container mx-auto px-4 py-8'>
       <div className='flex justify-between items-center mb-4'>
@@ -71,28 +55,11 @@ export default function Dashboard() {
         />
       </div>
 
-      {renderCommitments()}
-    </div>
-  )
-}
-
-function NoCommitmentsMessage({
-  viewMode,
-}: {
-  viewMode: 'active' | 'archived'
-}) {
-  return (
-    <div className='text-center py-12'>
-      <p className='text-gray-500 mb-4'>
-        {viewMode === 'active'
-          ? 'You have no active commitments'
-          : 'You have no archived commitments'}
-      </p>
-      {viewMode === 'active' && (
-        <Link to='/commitments/new'>
-          <Button variant='primary'>Create Your First Commitment</Button>
-        </Link>
-      )}
+      <CommitmentList
+        isLoading={isLoading}
+        filteredCommitments={filteredCommitments}
+        viewMode={viewMode}
+      />
     </div>
   )
 }
