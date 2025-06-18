@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import NavigationTabs from '~/components/NavigationTabs'
-import { useCommitmentDetail } from '~/hooks/useCommitmentDetail'
-import { type TabType } from '~/hooks/useTabNavigation'
+import { useCommitmentDetail } from '~/lib/hooks/useCommitmentDetail'
+import { type TabType } from '~/lib/hooks/useTabNavigation'
 import {
   CommitmentHeader,
   CommitmentDetails,
@@ -12,7 +12,7 @@ import {
   CommitmentEvents,
 } from '~/components/CommitmentDetail'
 import { BackButton, Button } from '~/components/ui'
-import { useCommitments } from '~/contexts/CommitmentContext'
+import { useCommitments } from '~/lib/contexts/CommitmentContext'
 
 export default function CommitmentDetail() {
   const navigate = useNavigate()

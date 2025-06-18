@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import type { Commitment } from '~/lib/types'
-import { useCommitments } from '~/contexts/CommitmentContext'
+import { useCommitments } from '~/lib/contexts/CommitmentContext'
 import {
   BackButton,
   Button,

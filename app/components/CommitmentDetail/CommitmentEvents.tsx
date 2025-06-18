@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { Commitment, Event } from '~/lib/types'
 import { EventList } from '../EventList'
 import { EventForm } from '../EventForm'
-import { useCommitments } from '~/contexts/CommitmentContext'
+import { useCommitments } from '~/lib/contexts/CommitmentContext'
 
 interface CommitmentEventsProps {
   commitment: Commitment

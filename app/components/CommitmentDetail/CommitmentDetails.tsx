@@ -3,7 +3,7 @@ import {
   type TimeBasedEntity,
   getHighlightedTimeBasedEntities,
 } from '~/lib/details'
-import type { TabType } from '~/hooks/useTabNavigation'
+import type { TabType } from '~/lib/hooks/useTabNavigation'
 import { HighlightedEntitiesGroup } from './HighlightedEntitiesGroup'
 import { MetadataSection } from './MetadataSection'
 

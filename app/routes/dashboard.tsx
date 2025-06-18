@@ -4,7 +4,7 @@ import type { Route } from './+types/dashboard'
 import { CommitmentList } from '~/components/CommitmentList'
 import { Button, Tabs } from '~/components/ui'
 import { SearchCommitments } from '~/components/SearchCommitments'
-import { useCommitments } from '~/contexts/CommitmentContext'
+import { useCommitments } from '~/lib/contexts/CommitmentContext'
 import { compareCommitmentsByUrgency } from '~/lib/sort'
 
 export function meta({}: Route.MetaArgs) {

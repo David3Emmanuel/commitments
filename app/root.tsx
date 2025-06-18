@@ -7,11 +7,11 @@ import {
   ScrollRestoration,
 } from 'react-router'
 import type { Route } from './+types/root'
-import { CommitmentProvider } from './contexts/CommitmentContext'
+import { CommitmentProvider } from './lib/contexts/CommitmentContext'
 import { ToastProvider } from './components/ui/Toast'
 import { ModalProvider } from './components/ui/Modal'
 import './app.css'
-import { useRegisterSW } from './hooks/useRegisterSW'
+import { useRegisterSW } from './lib/hooks/useRegisterSW'
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },

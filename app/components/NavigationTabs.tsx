@@ -1,7 +1,7 @@
 import React from 'react'
 import type { Commitment } from '~/lib/types'
 import { Tabs } from '~/components/ui'
-import { type TabType } from '~/hooks/useTabNavigation'
+import { type TabType } from '~/lib/hooks/useTabNavigation'
 
 interface NavigationTabsProps {
   activeTab: TabType

@@ -3,7 +3,7 @@ import { Link } from 'react-router'
 import type { Commitment, Habit, Task, Note, Event } from '~/lib/types'
 import { searchCommitments } from '~/lib/search'
 import { TextInput } from './ui'
-import { useCommitments } from '~/contexts/CommitmentContext'
+import { useCommitments } from '~/lib/contexts/CommitmentContext'
 
 interface SearchCommitmentsProps {
   className?: string

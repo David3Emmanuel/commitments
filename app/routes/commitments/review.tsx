@@ -13,7 +13,7 @@ import {
   Button,
   BackButton,
 } from '~/components/ui'
-import { useReviewProcess } from '~/hooks/useReviewProcess'
+import { useReviewProcess } from '~/lib/hooks/useReviewProcess'
 
 export default function ReviewCommitment() {
   const { id } = useParams<{ id: string }>()

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useCommitments } from '~/contexts/CommitmentContext'
+import { useCommitments } from '~/lib/contexts/CommitmentContext'
 import { useModal } from '~/components/ui'
 import type { Commitment, Task, Habit, Note } from '~/lib/types'
 
