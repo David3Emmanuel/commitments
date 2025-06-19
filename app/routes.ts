@@ -13,4 +13,5 @@ export default [
     route(':id/edit', './routes/commitments/edit.tsx'),
     route(':id/review', './routes/commitments/review.tsx'),
   ]),
+  route('settings', './routes/settings.tsx'),
 ] satisfies RouteConfig
