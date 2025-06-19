@@ -1,13 +1,9 @@
 import { useState } from 'react'
 import type { Commitment, Event } from '~/lib/types'
-import { Button, Card } from './ui'
+import { Button } from './ui'
 import { EventCard } from './EventCard'
-import {
-  compareEventsByUrgency,
-  getEventUrgency,
-  getUrgencyClass,
-} from '~/lib/sort'
-import { getStartOfDay, getTomorrow } from '~/lib/date'
+import useSort from '~/lib/hooks/useSort'
+import { useDate } from '~/lib/hooks/useDate'
 
 interface EventListProps {
   commitment: Commitment
@@ -21,6 +17,8 @@ export function EventList({
   onEditEvent,
 }: EventListProps) {
   const [filter, setFilter] = useState<'upcoming' | 'past' | 'all'>('upcoming')
+  const { getStartOfDay } = useDate()
+  const { compareEventsByUrgency, getEventUrgency, getUrgencyClass } = useSort()
 
   // Use utility to get today at midnight
   const today = getStartOfDay()

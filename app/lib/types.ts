@@ -53,3 +53,7 @@ export interface Commitment {
   events: Event[]
   status: 'active' | 'archived'
 }
+
+export interface Settings {
+  dayStartHour: number // Hour (0-23) that represents the start of a new day
+}

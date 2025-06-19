@@ -8,6 +8,7 @@ import {
 } from 'react-router'
 import type { Route } from './+types/root'
 import { CommitmentProvider } from './lib/contexts/CommitmentContext'
+import { SettingsProvider } from './lib/contexts/SettingsContext'
 import { ToastProvider } from './components/ui/Toast'
 import { ModalProvider } from './components/ui/Modal'
 import './app.css'
@@ -64,9 +65,11 @@ export default function App() {
   return (
     <ToastProvider>
       <ModalProvider>
-        <CommitmentProvider>
-          <Outlet />
-        </CommitmentProvider>
+        <SettingsProvider>
+          <CommitmentProvider>
+            <Outlet />
+          </CommitmentProvider>
+        </SettingsProvider>
       </ModalProvider>
     </ToastProvider>
   )

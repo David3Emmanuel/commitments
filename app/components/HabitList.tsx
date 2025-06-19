@@ -3,11 +3,7 @@ import { Badge, Button } from '~/components/ui'
 import { useModal } from '~/components/ui/Modal'
 import { HabitToggle } from '~/components/HabitToggle'
 import { isHabitActive } from '~/lib/habit'
-import {
-  compareHabitsByUrgency,
-  getHabitUrgency,
-  getUrgencyClass,
-} from '~/lib/sort'
+import useSort from '~/lib/hooks/useSort'
 
 interface HabitListProps {
   habits: Habit[]
@@ -23,6 +19,7 @@ export default function HabitList({
   onDeleteHabit,
 }: HabitListProps) {
   const modal = useModal()
+  const { compareHabitsByUrgency, getHabitUrgency, getUrgencyClass } = useSort()
 
   if (habits.length === 0) {
     return (

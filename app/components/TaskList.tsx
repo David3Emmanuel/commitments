@@ -1,11 +1,7 @@
 import type { Task } from '~/lib/types'
 import { Checkbox, Button } from '~/components/ui'
 import { useModal } from '~/components/ui/Modal'
-import {
-  compareTasksByUrgency,
-  getTaskUrgency,
-  getUrgencyClass,
-} from '~/lib/sort'
+import useSort from '~/lib/hooks/useSort'
 
 interface TaskListProps {
   tasks: Task[]
@@ -21,6 +17,8 @@ export default function TaskList({
   onDeleteTask,
 }: TaskListProps) {
   const modal = useModal()
+  const { compareTasksByUrgency, getTaskUrgency, getUrgencyClass } = useSort()
+
   if (tasks.length === 0) {
     return (
       <p className='text-gray-500 dark:text-gray-400 text-center py-6'>

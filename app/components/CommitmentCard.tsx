@@ -1,17 +1,15 @@
 import { Link } from 'react-router'
 import type { Commitment, Task } from '~/lib/types'
 import { Badge, ProgressBar } from '~/components/ui'
-import {
-  getCommitmentUrgency,
-  getUrgencyClass,
-  type UrgencyLevel,
-} from '~/lib/sort'
+import useSort, { type UrgencyLevel } from '~/lib/hooks/useSort'
 
 interface CommitmentCardProps {
   commitment: Commitment
 }
 
 export function CommitmentCard({ commitment }: CommitmentCardProps) {
+  const { getCommitmentUrgency, getUrgencyClass } = useSort()
+
   // Calculate next review date based on frequency
   const getNextReviewDate = (commitment: Commitment): Date => {
     if (!commitment.lastReviewedAt) {

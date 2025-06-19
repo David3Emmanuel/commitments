@@ -5,7 +5,7 @@ import { CommitmentList } from '~/components/CommitmentList'
 import { Button, Tabs } from '~/components/ui'
 import { SearchCommitments } from '~/components/SearchCommitments'
 import { useCommitments } from '~/lib/contexts/CommitmentContext'
-import { compareCommitmentsByUrgency } from '~/lib/sort'
+import useSort from '~/lib/hooks/useSort'
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -15,6 +15,7 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Dashboard() {
+  const { compareCommitmentsByUrgency } = useSort()
   const { isLoading, getActiveCommitments, getArchivedCommitments } =
     useCommitments()
   const [viewMode, setViewMode] = useState<'active' | 'archived'>('active')
