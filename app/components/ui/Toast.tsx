@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect, createContext, useContext } from 'react'
 import { createPortal } from 'react-dom'
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning'
@@ -14,11 +14,11 @@ interface ToastContextType {
   showToast: (message: string, type?: ToastType, duration?: number) => void
 }
 
-const ToastContext = React.createContext<ToastContextType>({
+const ToastContext = createContext<ToastContextType>({
   showToast: () => {},
 })
 
-export const useToast = () => React.useContext(ToastContext)
+export const useToast = () => useContext(ToastContext)
 
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
   children,

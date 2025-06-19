@@ -1,5 +1,3 @@
-import React from 'react'
-
 interface BackButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children?: React.ReactNode

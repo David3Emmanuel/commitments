@@ -1,4 +1,3 @@
-import React from 'react'
 import { TextArea } from '~/components/ui'
 
 interface NotesReviewProps {

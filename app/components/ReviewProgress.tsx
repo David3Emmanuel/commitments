@@ -1,5 +1,3 @@
-import React from 'react'
-
 type StepType = 'tasks' | 'habits' | 'notes' | 'complete'
 
 interface ReviewProgressProps {

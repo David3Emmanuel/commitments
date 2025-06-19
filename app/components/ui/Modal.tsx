@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, createContext, useContext } from 'react'
 import { createPortal } from 'react-dom'
 import Button from './Button'
 import TextInput from './TextInput'
@@ -87,7 +87,7 @@ interface ModalContextType {
   ) => Promise<string | null>
 }
 
-const ModalContext = React.createContext<ModalContextType>({
+const ModalContext = createContext<ModalContextType>({
   showTextModal: () => Promise.resolve(null),
   showDateModal: () => Promise.resolve(null),
   showDropdownModal: () => Promise.resolve(null),
@@ -95,7 +95,7 @@ const ModalContext = React.createContext<ModalContextType>({
   showModal: () => Promise.resolve(null),
 })
 
-export const useModal = () => React.useContext(ModalContext)
+export const useModal = () => useContext(ModalContext)
 
 export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({
   children,

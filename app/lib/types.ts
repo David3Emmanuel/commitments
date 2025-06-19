@@ -1,11 +1,11 @@
-export type Task = {
+export interface Task {
   id: string
   title: string
   dueAt?: Date | null
   completed: boolean
 }
 
-export type Habit = {
+export interface Habit {
   id: string
   title: string
   schedule: 'daily' | 'weekly' | 'monthly'
@@ -14,13 +14,13 @@ export type Habit = {
   endOn?: Date | null
 }
 
-export type Note = {
+export interface Note {
   id: string
   content: string
   timestamp: Date
 }
 
-export type Event = {
+export interface Event {
   id: string
   title: string
   date: Date
@@ -33,7 +33,7 @@ export type Event = {
   endOn?: Date | null // Only relevant for recurring events
 }
 
-export type Commitment = {
+export interface Commitment {
   id: string
   title: string
   description: string

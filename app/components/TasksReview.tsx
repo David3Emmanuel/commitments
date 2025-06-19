@@ -1,4 +1,3 @@
-import React from 'react'
 import type { Task } from '~/lib/types'
 import { useModal } from '~/components/ui/Modal'
 

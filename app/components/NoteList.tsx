@@ -1,4 +1,3 @@
-import React from 'react'
 import type { Note } from '~/lib/types'
 import { Button } from '~/components/ui'
 import { useModal } from '~/components/ui/Modal'

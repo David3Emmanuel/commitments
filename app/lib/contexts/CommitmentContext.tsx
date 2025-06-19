@@ -1,4 +1,4 @@
-import React, {
+import {
   createContext,
   useState,
   useContext,
@@ -7,7 +7,7 @@ import React, {
 } from 'react'
 import type { Commitment } from '~/lib/types'
 
-type CommitmentContextType = {
+interface CommitmentContextType {
   commitments: Commitment[]
   isLoading: boolean
   error: string | null

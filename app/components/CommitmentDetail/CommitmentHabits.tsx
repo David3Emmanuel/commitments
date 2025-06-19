@@ -1,4 +1,3 @@
-import React from 'react'
 import type { Habit } from '~/lib/types'
 import HabitList from '~/components/HabitList'
 import { Button } from '~/components/ui'

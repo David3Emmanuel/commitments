@@ -1,5 +1,3 @@
-import React from 'react'
-
 interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   label?: string
   options?: { value: string | number; label: string }[]

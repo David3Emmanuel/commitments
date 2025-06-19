@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import type { Event } from '~/lib/types'
 import { Button, Modal, TextInput, TextArea, Select } from './ui'
 

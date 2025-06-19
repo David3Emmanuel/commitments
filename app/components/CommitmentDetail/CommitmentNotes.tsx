@@ -1,4 +1,3 @@
-import React from 'react'
 import type { Note } from '~/lib/types'
 import NoteList from '~/components/NoteList'
 import { Button } from '~/components/ui'

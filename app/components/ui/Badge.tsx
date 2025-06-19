@@ -1,5 +1,3 @@
-import React from 'react'
-
 type BadgeVariant = 'default' | 'primary' | 'success' | 'warning' | 'danger'
 
 interface BadgeProps {

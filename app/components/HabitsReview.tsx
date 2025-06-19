@@ -1,4 +1,3 @@
-import React from 'react'
 import type { Habit } from '~/lib/types'
 import { Checkbox } from '~/components/ui'
 

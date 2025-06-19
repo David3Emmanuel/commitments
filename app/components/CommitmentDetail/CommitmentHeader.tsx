@@ -1,4 +1,3 @@
-import React from 'react'
 import { Link } from 'react-router'
 import type { Commitment } from '~/lib/types'
 import { isReviewDue } from '~/lib/details'

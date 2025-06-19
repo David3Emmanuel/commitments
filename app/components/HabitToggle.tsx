@@ -1,4 +1,3 @@
-import type React from 'react'
 import { isHabitActive } from '~/lib/habit'
 import type { Habit } from '~/lib/types'
 

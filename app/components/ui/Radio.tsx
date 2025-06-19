@@ -1,5 +1,3 @@
-import React from 'react'
-
 interface RadioProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
   label?: string
