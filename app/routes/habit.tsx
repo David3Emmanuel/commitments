@@ -15,6 +15,7 @@ export default function Habit() {
     toggleHabit,
     isCompletedForDate,
     calculateStreak,
+    canToggleDate,
   } = useHabitDetails(id || '')
   const { getNow } = useDate()
 
@@ -142,7 +143,6 @@ export default function Habit() {
               </div>
             </div>
           </div>
-
           <div className='bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 p-6 rounded-lg shadow border border-gray-200 dark:border-gray-700 mb-8 transition-colors'>
             <div className='flex flex-col sm:flex-row justify-between items-center'>
               <div className='mb-4 sm:mb-0'>
@@ -164,15 +164,19 @@ export default function Habit() {
                 </div>
               </div>
             </div>
-          </div>
-
+          </div>{' '}
           <div className='flex flex-col items-center justify-center'>
             <h2 className='text-xl font-semibold mb-4 text-center dark:text-gray-200'>
               Today's Progress
             </h2>
             <button
               onClick={() => toggleHabit(getNow())}
-              className={`px-6 py-3 rounded-full text-lg font-semibold shadow-md transition-all transform hover:scale-105 ${
+              disabled={!canToggleDate(getNow())}
+              className={`px-6 py-3 rounded-full text-lg font-semibold shadow-md transition-all transform ${
+                canToggleDate(getNow())
+                  ? 'hover:scale-105'
+                  : 'opacity-75 cursor-not-allowed'
+              } ${
                 isCompletedForDate(getNow())
                   ? 'bg-green-500 hover:bg-green-600 text-white dark:bg-green-600 dark:hover:bg-green-700'
                   : 'bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-200'
@@ -200,12 +204,17 @@ export default function Habit() {
                 'Mark as Complete'
               )}
             </button>
+            {!canToggleDate(getNow()) && (
+              <p className='mt-2 text-sm text-gray-500 dark:text-gray-400'>
+                Habits can only be toggled for the current day
+              </p>
+            )}
           </div>
-
           <div className='mt-8'>
             <HabitCalendar
               isCompletedForDate={isCompletedForDate}
               toggleHabit={toggleHabit}
+              canToggleDate={canToggleDate}
             />
           </div>
         </div>

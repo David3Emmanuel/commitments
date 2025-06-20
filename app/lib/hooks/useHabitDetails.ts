@@ -11,6 +11,7 @@ interface HabitDetails {
   toggleHabit: (date: Date) => void
   isCompletedForDate: (date: Date) => boolean
   calculateStreak: () => number
+  canToggleDate: (date: Date) => boolean
 }
 
 export function useHabitDetails(habitId: string): HabitDetails {
@@ -20,7 +21,7 @@ export function useHabitDetails(habitId: string): HabitDetails {
   )
   const [error, setError] = useState<string | null>(null)
   const { commitments, isLoading, updateCommitment } = useCommitments()
-  const { isSameDay, getStartOfDay, getNow } = useDate()
+  const { isSameDay, getStartOfDay, getNow, isToday } = useDate()
 
   useEffect(() => {
     if (!habitId || isLoading) {
@@ -95,6 +96,14 @@ export function useHabitDetails(habitId: string): HabitDetails {
     // Use isSameDay to respect user's day start hour setting
     return habit.history.some((d) => isSameDay(new Date(d), date))
   }
+
+  const canToggleDate = (date: Date): boolean => {
+    if (!habit) return false
+
+    // Can only toggle today based on the day start hour setting
+    return isToday(date)
+  }
+
   const calculateStreak = (): number => {
     if (!habit || habit.schedule !== 'daily' || habit.history.length === 0)
       return 0
@@ -153,5 +162,6 @@ export function useHabitDetails(habitId: string): HabitDetails {
     toggleHabit,
     isCompletedForDate,
     calculateStreak,
+    canToggleDate,
   }
 }

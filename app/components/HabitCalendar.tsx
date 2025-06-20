@@ -10,11 +10,13 @@ interface CalendarDay {
 interface HabitCalendarProps {
   isCompletedForDate: (date: Date) => boolean
   toggleHabit: (date: Date) => void
+  canToggleDate: (date: Date) => boolean
 }
 
 export function HabitCalendar({
   isCompletedForDate,
   toggleHabit,
+  canToggleDate,
 }: HabitCalendarProps) {
   const { getNow, isSameDay } = useDate()
   const [currentMonth, setCurrentMonth] = React.useState(new Date())
@@ -159,13 +161,11 @@ export function HabitCalendar({
           </button>
         </div>
       </div>
-
       <div className='text-center mb-4'>
         <h3 className='text-lg font-medium text-gray-800 dark:text-gray-200'>
           {monthName} {year}
         </h3>
       </div>
-
       <div className='grid grid-cols-7 gap-1 mb-2'>
         {daysOfWeek.map((day) => (
           <div
@@ -175,34 +175,47 @@ export function HabitCalendar({
             {day}
           </div>
         ))}
-      </div>
-
+      </div>{' '}
       <div className='grid grid-cols-7 gap-1'>
-        {calendarDays.map((day, index) => (
-          <button
-            key={index}
-            onClick={() => toggleHabit(day.date)}
-            className={`
-              aspect-square flex items-center justify-center rounded-full text-sm p-1
-              transition-all transform hover:scale-110 
-              ${
-                !day.isCurrentMonth
-                  ? 'text-gray-400 dark:text-gray-500'
-                  : 'text-gray-800 dark:text-gray-200'
-              } 
-              ${day.isToday ? 'ring-2 ring-blue-500 dark:ring-blue-400' : ''}
-              ${
-                isCompletedForDate(day.date)
-                  ? 'bg-green-500 hover:bg-green-600 text-white dark:bg-green-600 dark:hover:bg-green-700'
-                  : day.isCurrentMonth
-                  ? 'hover:bg-gray-100 dark:hover:bg-gray-700'
-                  : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-              }
-            `}
-          >
-            {day.date.getDate()}
-          </button>
-        ))}
+        {calendarDays.map((day, index) => {
+          const canToggle = canToggleDate(day.date)
+          return (
+            <button
+              key={index}
+              onClick={canToggle ? () => toggleHabit(day.date) : undefined}
+              disabled={!canToggle}
+              className={`
+                aspect-square flex items-center justify-center rounded-full text-sm p-1
+                ${
+                  canToggle
+                    ? 'transition-all transform hover:scale-110'
+                    : 'cursor-default'
+                }
+                ${
+                  !day.isCurrentMonth
+                    ? 'text-gray-400 dark:text-gray-500'
+                    : 'text-gray-800 dark:text-gray-200'
+                } 
+                ${day.isToday ? 'ring-2 ring-blue-500 dark:ring-blue-400' : ''}
+                ${
+                  isCompletedForDate(day.date)
+                    ? canToggle
+                      ? 'bg-green-500 hover:bg-green-600 text-white dark:bg-green-600 dark:hover:bg-green-700'
+                      : 'bg-green-500/80 text-white dark:bg-green-600/80' // Non-toggleable but completed
+                    : day.isCurrentMonth
+                    ? canToggle
+                      ? 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                      : ''
+                    : canToggle
+                    ? 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                    : ''
+                }
+              `}
+            >
+              {day.date.getDate()}
+            </button>
+          )
+        })}
       </div>
     </div>
   )
