@@ -12,9 +12,12 @@ interface HabitDetails {
   isCompletedForDate: (date: Date) => boolean
   calculateStreak: () => number
   canToggleDate: (date: Date) => boolean
+  isHabitActive: () => boolean
 }
 
-export function useHabitDetails(habitId: string): HabitDetails {
+type HabitInput = string | Habit
+
+export function useHabitDetails(habitInput: HabitInput): HabitDetails {
   const [habit, setHabit] = useState<Habit | null>(null)
   const [parentCommitment, setParentCommitment] = useState<Commitment | null>(
     null,
@@ -24,7 +27,28 @@ export function useHabitDetails(habitId: string): HabitDetails {
   const { isSameDay, getStartOfDay, getNow, isToday } = useDate()
 
   useEffect(() => {
-    if (!habitId || isLoading) {
+    if (isLoading) {
+      return
+    }
+
+    // If habitInput is a Habit object, use it directly
+    if (typeof habitInput !== 'string') {
+      setHabit(habitInput)
+
+      // Find parent commitment for the habit
+      const foundCommitment =
+        commitments.find((commitment) =>
+          commitment.subItems.habits.some((h) => h.id === habitInput.id),
+        ) || null
+
+      setParentCommitment(foundCommitment)
+      setError(null)
+      return
+    }
+
+    // Otherwise, habitInput is an ID string
+    const habitId = habitInput
+    if (!habitId) {
       return
     }
 
@@ -52,7 +76,8 @@ export function useHabitDetails(habitId: string): HabitDetails {
       setParentCommitment(null)
       setError('Habit not found')
     }
-  }, [habitId, commitments, isLoading])
+  }, [habitInput, commitments, isLoading])
+
   const toggleHabit = (date: Date) => {
     if (!habit || !parentCommitment) return
 
@@ -81,7 +106,7 @@ export function useHabitDetails(habitId: string): HabitDetails {
       subItems: {
         ...parentCommitment.subItems,
         habits: parentCommitment.subItems.habits.map((h) =>
-          h.id === habitId ? updatedHabit : h,
+          h.id === habit.id ? updatedHabit : h,
         ),
       },
     }
@@ -154,6 +179,19 @@ export function useHabitDetails(habitId: string): HabitDetails {
     return streak
   }
 
+  const isHabitActive = (): boolean => {
+    if (!habit) return false
+
+    const today = getNow()
+    const startOn = habit.startOn ? new Date(habit.startOn) : null
+    const endOn = habit.endOn ? new Date(habit.endOn) : null
+
+    const hasStarted = startOn ? today >= startOn : true
+    const hasEnded = endOn ? today > endOn : false
+
+    return hasStarted && !hasEnded
+  }
+
   return {
     habit,
     commitment: parentCommitment,
@@ -163,5 +201,6 @@ export function useHabitDetails(habitId: string): HabitDetails {
     isCompletedForDate,
     calculateStreak,
     canToggleDate,
+    isHabitActive,
   }
 }
