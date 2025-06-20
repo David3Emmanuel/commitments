@@ -250,15 +250,38 @@ export default function useSort() {
    * @param b Second event
    * @param isPastView Whether we're viewing past events
    * @returns Comparison result (-1, 0, or 1)
+   */ /**
+   * Gets the relevant date for an event (next occurrence for recurring events)
+   *
+   * @param event The event to get relevant date for
+   * @param referenceDate The reference date to calculate from (usually today)
+   * @returns The relevant date for the event
    */
+  const getRelevantEventDate = (
+    event: Event,
+    referenceDate?: Date,
+  ): Date | null => {
+    const fromDate = referenceDate || getStartOfDay()
+
+    if (event.schedule) {
+      return getNextEventDate(event, fromDate)
+    }
+    const eventDate = new Date(event.date)
+    eventDate.setHours(0, 0, 0, 0)
+    return eventDate
+  }
   const compareEventsByUrgency = (
     a: Event,
     b: Event,
     isPastView: boolean,
   ): number => {
+    const today = getStartOfDay()
+    const aDate = getRelevantEventDate(a, today) || new Date(a.date)
+    const bDate = getRelevantEventDate(b, today) || new Date(b.date)
+
     // For past events, most recent first
     if (isPastView) {
-      return new Date(b.date).getTime() - new Date(a.date).getTime()
+      return bDate.getTime() - aDate.getTime()
     }
 
     // Get urgency levels
@@ -271,7 +294,7 @@ export default function useSort() {
     }
 
     // Otherwise sort by date (closest first)
-    return new Date(a.date).getTime() - new Date(b.date).getTime()
+    return aDate.getTime() - bDate.getTime()
   }
 
   /**
@@ -388,7 +411,6 @@ export default function useSort() {
     if (timeBasedEntities.length === 0) return null
     return timeBasedEntities[0].date
   }
-
   return {
     getTaskUrgency,
     getHabitUrgency,
@@ -401,5 +423,6 @@ export default function useSort() {
     isReviewOverdue,
     compareCommitmentsByUrgency,
     getMostUrgentDate,
+    getRelevantEventDate,
   }
 }

@@ -18,7 +18,12 @@ export function EventList({
 }: EventListProps) {
   const [filter, setFilter] = useState<'upcoming' | 'past' | 'all'>('upcoming')
   const { getStartOfDay } = useDate()
-  const { compareEventsByUrgency, getEventUrgency, getUrgencyClass } = useSort()
+  const {
+    compareEventsByUrgency,
+    getEventUrgency,
+    getUrgencyClass,
+    getRelevantEventDate,
+  } = useSort()
 
   // Use utility to get today at midnight
   const today = getStartOfDay()
@@ -27,13 +32,16 @@ export function EventList({
 
   const filteredEvents = events.filter((event) => {
     if (filter === 'all') return true
-    const eventDate = new Date(event.date)
-    eventDate.setHours(0, 0, 0, 0)
+
+    // Get relevant date using the exported function from useSort
+    const relevantDate = getRelevantEventDate(event, today)
 
     if (filter === 'upcoming') {
-      return eventDate >= today
+      // For upcoming, include if there's a relevant date in the future
+      return relevantDate !== null && relevantDate >= today
     } else {
-      return eventDate < today
+      // For past, include if there's no future date or the date is in the past
+      return relevantDate === null || relevantDate < today
     }
   })
 
