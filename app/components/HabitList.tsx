@@ -3,8 +3,8 @@ import { Link } from 'react-router'
 import { Badge, Button } from '~/components/ui'
 import { useModal } from '~/components/ui/Modal'
 import { HabitToggle } from '~/components/HabitToggle'
-import { isHabitActive } from '~/lib/habit'
 import useSort from '~/lib/hooks/useSort'
+import { useHabitDetails } from '~/lib/hooks/useHabitDetails'
 
 interface HabitListProps {
   habits: Habit[]
@@ -44,7 +44,8 @@ export default function HabitList({
       {sortedHabits.map((habit) => {
         // Get urgency class from utility
         const urgencyClass = getUrgencyClass(getHabitUrgency(habit))
-        const isActive = isHabitActive(habit)
+        const { isHabitActive } = useHabitDetails(habit)
+        const isActive = isHabitActive()
 
         return (
           <li key={habit.id} className={`py-4 ${urgencyClass}`}>

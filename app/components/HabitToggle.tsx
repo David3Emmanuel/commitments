@@ -1,4 +1,4 @@
-import { isHabitActive } from '~/lib/habit'
+import { useHabitDetails } from '~/lib/hooks/useHabitDetails'
 import { useDate } from '~/lib/hooks/useDate'
 import type { Habit } from '~/lib/types'
 
@@ -10,6 +10,7 @@ export function HabitToggle({
   onToggle: (habitId: string, date: Date) => void
 }) {
   const { getNow, isSameDay } = useDate()
+  const { isHabitActive } = useHabitDetails(habit)
   const today = getNow()
 
   // Check if habit was tracked today, respecting user's day start hour setting
@@ -18,7 +19,7 @@ export function HabitToggle({
   })
 
   // If habit is not active, return a disabled button
-  if (!isHabitActive(habit)) {
+  if (!isHabitActive()) {
     return (
       <button
         disabled

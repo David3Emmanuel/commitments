@@ -107,7 +107,7 @@ export function HabitCalendar({
   const year = currentMonth.getFullYear()
 
   return (
-    <div className='bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 transition-colors'>
+    <div className='bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 transition-colors max-w-96 mx-auto'>
       <div className='flex items-center justify-between mb-4'>
         <h2 className='text-xl font-semibold text-gray-700 dark:text-gray-200'>
           Habit Calendar
