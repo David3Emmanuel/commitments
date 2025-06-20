@@ -1,4 +1,5 @@
 import { isHabitActive } from '~/lib/habit'
+import { useDate } from '~/lib/hooks/useDate'
 import type { Habit } from '~/lib/types'
 
 export function HabitToggle({
@@ -8,12 +9,12 @@ export function HabitToggle({
   habit: Habit
   onToggle: (habitId: string, date: Date) => void
 }) {
-  const today = new Date()
-  const todayStr = today.toDateString()
+  const { getNow, isSameDay } = useDate()
+  const today = getNow()
 
-  // Check if habit was tracked today
+  // Check if habit was tracked today, respecting user's day start hour setting
   const isTrackedToday = habit.history.some((date) => {
-    return new Date(date).toDateString() === todayStr
+    return isSameDay(new Date(date), today)
   })
 
   // If habit is not active, return a disabled button

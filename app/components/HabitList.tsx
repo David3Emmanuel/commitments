@@ -1,4 +1,5 @@
 import type { Habit } from '~/lib/types'
+import { Link } from 'react-router'
 import { Badge, Button } from '~/components/ui'
 import { useModal } from '~/components/ui/Modal'
 import { HabitToggle } from '~/components/HabitToggle'
@@ -49,10 +50,17 @@ export default function HabitList({
           <li key={habit.id} className={`py-4 ${urgencyClass}`}>
             <div className='flex items-center justify-between'>
               <h3 className='text-sm font-medium text-gray-800 dark:text-gray-200'>
-                {habit.title}
-                {!isActive && (
-                  <span className='ml-2 text-xs text-gray-400'>(Inactive)</span>
-                )}
+                <Link
+                  to={`/habit/${habit.id}`}
+                  className='hover:text-blue-600 dark:hover:text-blue-400 transition-colors'
+                >
+                  {habit.title}
+                  {!isActive && (
+                    <span className='ml-2 text-xs text-gray-400'>
+                      (Inactive)
+                    </span>
+                  )}
+                </Link>
               </h3>
               <div className='flex items-center gap-2'>
                 <Badge variant='primary'>{habit.schedule}</Badge>
@@ -120,7 +128,7 @@ export default function HabitList({
                   />
                 )}
               </div>
-            </div>
+            </div>{' '}
             <div className='mt-2'>
               <div className='text-xs text-gray-500 dark:text-gray-400 flex flex-wrap gap-x-4'>
                 <span>{habit.history.length} check-ins recorded</span>
@@ -132,7 +140,32 @@ export default function HabitList({
                   <Badge key={i} variant='default'>
                     {new Date(date).toLocaleDateString()}
                   </Badge>
-                ))}
+                ))}{' '}
+                {habit.history.length > 5 && (
+                  <Link to={`/habit/${habit.id}`}>
+                    <Badge variant='primary'>View all...</Badge>
+                  </Link>
+                )}
+              </div>
+              <div className='mt-2 text-xs'>
+                <Link
+                  to={`/habit/${habit.id}`}
+                  className='text-blue-600 dark:text-blue-400 hover:underline flex items-center'
+                >
+                  <span>View habit details</span>
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    className='h-3 w-3 ml-1'
+                    viewBox='0 0 20 20'
+                    fill='currentColor'
+                  >
+                    <path
+                      fillRule='evenodd'
+                      d='M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z'
+                      clipRule='evenodd'
+                    />
+                  </svg>
+                </Link>
               </div>
             </div>
           </li>
