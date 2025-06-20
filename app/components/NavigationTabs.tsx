@@ -13,9 +13,13 @@ export default function NavigationTabs({
   onTabChange,
   commitment,
 }: NavigationTabsProps) {
+  const remainingTasks = commitment.subItems.tasks.filter(
+    (task) => !task.completed,
+  )
+
   const tabs = [
     { id: 'details', label: 'Details' },
-    { id: 'tasks', label: 'Tasks', count: commitment.subItems.tasks.length },
+    { id: 'tasks', label: 'Tasks', count: remainingTasks.length },
     { id: 'habits', label: 'Habits', count: commitment.subItems.habits.length },
     { id: 'notes', label: 'Notes', count: commitment.notes.length },
     { id: 'events', label: 'Events', count: commitment.events.length },
