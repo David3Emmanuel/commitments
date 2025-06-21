@@ -5,6 +5,7 @@ import { DateModalInput, type DateModalInputProps } from './date'
 import { DropdownModalInput, type DropdownModalInputProps } from './dropdown'
 import { ConfirmModalInput, type ConfirmModalInputProps } from './confirm'
 import { NumericModalInput, type NumericModalInputProps } from './numeric'
+import { ChecklistModalInput, type ChecklistModalInputProps } from './checklist'
 
 // Union type of all modal input props
 type ModalInputProps =
@@ -13,6 +14,7 @@ type ModalInputProps =
   | DropdownModalInputProps
   | ConfirmModalInputProps
   | NumericModalInputProps
+  | ChecklistModalInputProps
 
 // Context for showing modals
 interface ModalContextType {
@@ -40,13 +42,19 @@ interface ModalContextType {
       step?: number
       allowDecimal?: boolean
     },
-  ) => Promise<string | null>
+  ) => Promise<number | null>
   showConfirmModal: (
     title: string,
     message: string,
     confirmLabel?: string,
     cancelLabel?: string,
   ) => Promise<boolean>
+  showChecklistModal: (
+    title: string,
+    options?: string[],
+    initialValues?: string[],
+    allowNewItems?: boolean,
+  ) => Promise<string[] | null>
   // For backwards compatibility
   showModal: (
     title: string,
@@ -61,6 +69,7 @@ const ModalContext = createContext<ModalContextType>({
   showDropdownModal: () => Promise.resolve(null),
   showNumericModal: () => Promise.resolve(null),
   showConfirmModal: () => Promise.resolve(false),
+  showChecklistModal: () => Promise.resolve(null),
   showModal: () => Promise.resolve(null),
 })
 
@@ -173,7 +182,7 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({
       step?: number
       allowDecimal?: boolean
     } = {},
-  ): Promise<string | null> => {
+  ): Promise<number | null> => {
     return new Promise((resolve) => {
       setModalProps({
         type: 'numeric',
@@ -186,11 +195,36 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({
         allowDecimal: options.allowDecimal,
         onSubmit: (value) => {
           setModalProps(null)
-          resolve(value)
+          resolve(options.allowDecimal ? parseFloat(value) : parseInt(value))
         },
         onCancel: () => {
           setModalProps(null)
           resolve(null)
+        },
+      })
+    })
+  }
+
+  const showChecklistModal = (
+    title: string,
+    options?: string[],
+    initialValues?: string[],
+    allowNewItems?: boolean,
+  ): Promise<string[]> => {
+    return new Promise((resolve) => {
+      setModalProps({
+        type: 'checklist',
+        title,
+        options,
+        initialValues,
+        allowNewItems,
+        onSubmit: (value) => {
+          setModalProps(null)
+          resolve(value)
+        },
+        onCancel: () => {
+          setModalProps(null)
+          resolve([])
         },
       })
     })
@@ -212,6 +246,7 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({
         showDropdownModal,
         showConfirmModal,
         showNumericModal,
+        showChecklistModal,
         showModal,
       }}
     >
@@ -236,6 +271,8 @@ const ModalInput: React.FC<ModalInputProps> = (props) => {
       return <ConfirmModalInput {...props} />
     case 'numeric':
       return <NumericModalInput {...props} />
+    case 'checklist':
+      return <ChecklistModalInput {...props} />
   }
 }
 
