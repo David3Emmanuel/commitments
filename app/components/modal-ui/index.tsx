@@ -4,6 +4,7 @@ import { TextModalInput, type TextModalInputProps } from './text'
 import { DateModalInput, type DateModalInputProps } from './date'
 import { DropdownModalInput, type DropdownModalInputProps } from './dropdown'
 import { ConfirmModalInput, type ConfirmModalInputProps } from './confirm'
+import { NumericModalInput, type NumericModalInputProps } from './numeric'
 
 // Union type of all modal input props
 type ModalInputProps =
@@ -11,6 +12,7 @@ type ModalInputProps =
   | DateModalInputProps
   | DropdownModalInputProps
   | ConfirmModalInputProps
+  | NumericModalInputProps
 
 // Context for showing modals
 interface ModalContextType {
@@ -27,6 +29,17 @@ interface ModalContextType {
     title: string,
     options: { value: string; label: string }[],
     initialValue?: string,
+  ) => Promise<string | null>
+  showNumericModal: (
+    title: string,
+    options?: {
+      placeholder?: string
+      initialValue?: string
+      min?: number
+      max?: number
+      step?: number
+      allowDecimal?: boolean
+    },
   ) => Promise<string | null>
   showConfirmModal: (
     title: string,
@@ -46,6 +59,7 @@ const ModalContext = createContext<ModalContextType>({
   showTextModal: () => Promise.resolve(null),
   showDateModal: () => Promise.resolve(null),
   showDropdownModal: () => Promise.resolve(null),
+  showNumericModal: () => Promise.resolve(null),
   showConfirmModal: () => Promise.resolve(false),
   showModal: () => Promise.resolve(null),
 })
@@ -149,6 +163,39 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({
     })
   }
 
+  const showNumericModal = (
+    title: string,
+    options: {
+      placeholder?: string
+      initialValue?: string
+      min?: number
+      max?: number
+      step?: number
+      allowDecimal?: boolean
+    } = {},
+  ): Promise<string | null> => {
+    return new Promise((resolve) => {
+      setModalProps({
+        type: 'numeric',
+        title,
+        placeholder: options.placeholder,
+        initialValue: options.initialValue,
+        min: options.min,
+        max: options.max,
+        step: options.step,
+        allowDecimal: options.allowDecimal,
+        onSubmit: (value) => {
+          setModalProps(null)
+          resolve(value)
+        },
+        onCancel: () => {
+          setModalProps(null)
+          resolve(null)
+        },
+      })
+    })
+  }
+
   // For backwards compatibility with existing code
   const showModal = (
     title: string,
@@ -164,6 +211,7 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({
         showDateModal,
         showDropdownModal,
         showConfirmModal,
+        showNumericModal,
         showModal,
       }}
     >
@@ -186,6 +234,8 @@ const ModalInput: React.FC<ModalInputProps> = (props) => {
       return <DropdownModalInput {...props} />
     case 'confirm':
       return <ConfirmModalInput {...props} />
+    case 'numeric':
+      return <NumericModalInput {...props} />
   }
 }
 

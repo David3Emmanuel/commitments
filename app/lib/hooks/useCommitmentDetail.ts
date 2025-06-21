@@ -7,7 +7,8 @@ import type { Commitment, Task, Habit, Note } from '~/lib/types'
 export function useCommitmentDetail(id: string | undefined) {
   const [commitment, setCommitment] = useState<Commitment | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const { showTextModal, showDateModal, showDropdownModal } = useModal()
+  const { showTextModal, showDateModal, showDropdownModal, showNumericModal } =
+    useModal()
   const {
     getCommitment,
     updateCommitment,
@@ -202,17 +203,16 @@ export function useCommitmentDetail(id: string | undefined) {
       'none',
     )
 
-    if (!targetType) return
-
-    // Initialize target based on selected type
+    if (!targetType) return // Initialize target based on selected type
     let target: HabitTarget = null
 
     if (targetType === 'number') {
-      const numberTarget = await showTextModal(
-        'Enter your target number:',
-        'Target (number)',
-        '1',
-      )
+      const numberTarget = await showNumericModal('Enter your target number:', {
+        placeholder: 'Target (number)',
+        initialValue: '1',
+        min: 0,
+        step: 1,
+      })
       if (numberTarget) {
         target = Number(numberTarget)
       }
@@ -310,15 +310,14 @@ export function useCommitmentDetail(id: string | undefined) {
     )
 
     // Handle editing target value while maintaining target type
-    let updatedTarget = habit.target
-
-    // Determine the target type based on existing target
+    let updatedTarget = habit.target // Determine the target type based on existing target
     if (typeof habit.target === 'number') {
-      const numberTarget = await showTextModal(
-        'Edit your target number:',
-        'Target (number)',
-        habit.target.toString(),
-      )
+      const numberTarget = await showNumericModal('Edit your target number:', {
+        placeholder: 'Target (number)',
+        initialValue: habit.target.toString(),
+        min: 0,
+        step: 1,
+      })
       if (numberTarget) {
         updatedTarget = Number(numberTarget)
       }

@@ -116,15 +116,14 @@ export function HabitCalendar({
     if (habitTarget === null || habitTarget === undefined) {
       toggleHabit(date)
       return
-    }
-
-    // For numeric targets
+    } // For numeric targets
     if (typeof habitTarget === 'number') {
-      const value = await modal.showTextModal(
-        'Enter value for this day:',
-        'Value',
-        habitTarget.toString(),
-      )
+      const value = await modal.showNumericModal('Enter value for this day:', {
+        placeholder: 'Value',
+        initialValue: habitTarget.toString(),
+        min: 0,
+        allowDecimal: true,
+      })
 
       if (value) {
         const numValue = parseFloat(value)

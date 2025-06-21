@@ -65,10 +65,14 @@ export function HabitToggle({
       return
     } else if (typeof habit.target === 'number') {
       // For numeric targets, prompt for a value
-      const value = await modal.showTextModal(
+      const value = await modal.showNumericModal(
         'Enter value for this habit:',
-        'Value',
-        habit.target.toString(),
+        {
+          placeholder: 'Value',
+          initialValue: habit.target.toString(),
+          min: 0,
+          allowDecimal: true,
+        },
       )
 
       if (value) {
