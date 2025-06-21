@@ -78,47 +78,108 @@ export function useHabitDetails(habitInput: HabitInput): HabitDetails {
       setError('Habit not found')
     }
   }, [habitInput, commitments, isLoading])
+  // Helper functions for type-specific logic
+  function handleNumericTarget(
+    existingKey: string,
+    existingValue: any,
+    value: number | undefined,
+    updatedHistory: Record<string, any>,
+    target: number,
+  ) {
+    if (value === 0) {
+      delete updatedHistory[existingKey]
+    } else {
+      updatedHistory[existingKey] = {
+        ...existingValue,
+        value,
+        completed: value! >= target,
+      }
+    }
+  }
+
+  function handleChecklistTarget(
+    existingKey: string,
+    existingValue: any,
+    value: string[] | undefined,
+    updatedHistory: Record<string, any>,
+    targetItems: string[],
+  ) {
+    if (!value || value.length === 0) {
+      delete updatedHistory[existingKey]
+    } else {
+      const isComplete = targetItems.every((item) => value.includes(item))
+      updatedHistory[existingKey] = {
+        ...existingValue,
+        value,
+        completed: isComplete,
+      }
+    }
+  }
+
+  function getDefaultValueAndCompletion(
+    habitTarget: Habit['target'],
+    value: HabitTarget | undefined,
+  ): { habitValue: HabitTarget; isCompleted: boolean } {
+    if (value !== undefined) {
+      if (typeof habitTarget === 'number' && typeof value === 'number') {
+        return { habitValue: value, isCompleted: value >= habitTarget }
+      } else if (Array.isArray(habitTarget) && Array.isArray(value)) {
+        const isComplete = habitTarget.every((item) => value.includes(item))
+        return { habitValue: value, isCompleted: isComplete }
+      } else {
+        return { habitValue: value, isCompleted: true }
+      }
+    } else {
+      if (typeof habitTarget === 'number') {
+        return { habitValue: habitTarget, isCompleted: true }
+      } else if (Array.isArray(habitTarget)) {
+        return { habitValue: [...habitTarget], isCompleted: true }
+      } else {
+        return { habitValue: null, isCompleted: true }
+      }
+    }
+  }
 
   const toggleHabit = (date: Date, value?: HabitTarget) => {
     if (!habit || !parentCommitment) return
 
-    // Create a copy of the history record
     const updatedHistory = { ...habit.history }
-
-    // Format the date to use as key (YYYY-MM-DD format)
     const dateStr = date.toISOString().split('T')[0]
-
-    // Check if this date exists in the history
     const existingEntry = Object.entries(updatedHistory).find(([key, entry]) =>
       isSameDay(new Date(entry.date), date),
     )
 
     if (existingEntry) {
-      // If it exists, remove it
-      delete updatedHistory[existingEntry[0]]
-    } else {
-      // Determine the appropriate value based on habit target type
-      let habitValue: HabitTarget = null
+      const [existingKey, existingValue] = existingEntry
 
-      if (value !== undefined) {
-        // If a value was explicitly provided, use it
-        habitValue = value
+      if (typeof habit.target === 'number' && typeof value === 'number') {
+        handleNumericTarget(
+          existingKey,
+          existingValue,
+          value,
+          updatedHistory,
+          habit.target,
+        )
+      } else if (Array.isArray(habit.target) && Array.isArray(value)) {
+        handleChecklistTarget(
+          existingKey,
+          existingValue,
+          value,
+          updatedHistory,
+          habit.target as string[],
+        )
       } else {
-        // Otherwise use the habit's target value based on its type
-        if (typeof habit.target === 'number') {
-          habitValue = habit.target
-        } else if (Array.isArray(habit.target)) {
-          habitValue = [...habit.target] // Use a copy of the checklist
-        } else {
-          habitValue = null // Default is null for simple completion
-        }
+        delete updatedHistory[existingKey]
       }
-
-      // Add the entry as completed
+    } else {
+      const { habitValue, isCompleted } = getDefaultValueAndCompletion(
+        habit.target,
+        value,
+      )
       updatedHistory[dateStr] = {
         date,
         value: habitValue,
-        completed: true,
+        completed: isCompleted,
       }
     }
 
