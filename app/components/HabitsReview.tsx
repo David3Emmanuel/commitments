@@ -41,7 +41,8 @@ const HabitsReview: React.FC<HabitsReviewProps> = ({
                     {habit.title}
                   </span>
                   <span className='text-xs text-gray-500 dark:text-gray-400'>
-                    {habit.schedule} · {habit.history.length} previous check-ins
+                    {habit.schedule} · {Object.keys(habit.history).length}{' '}
+                    previous check-ins
                   </span>
                 </div>
               </div>

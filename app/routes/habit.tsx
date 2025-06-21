@@ -16,6 +16,7 @@ export default function Habit() {
     isCompletedForDate,
     calculateStreak,
     canToggleDate,
+    getValueForDate,
   } = useHabitDetails(id || '')
   const { getNow } = useDate()
 
@@ -209,12 +210,14 @@ export default function Habit() {
                 Habits can only be toggled for the current day
               </p>
             )}
-          </div>
+          </div>{' '}
           <div className='mt-8'>
             <HabitCalendar
               isCompletedForDate={isCompletedForDate}
               toggleHabit={toggleHabit}
               canToggleDate={canToggleDate}
+              getValueForDate={getValueForDate}
+              habitTarget={habit?.target}
             />
           </div>
         </div>

@@ -26,6 +26,36 @@ const CommitmentContext = createContext<CommitmentContextType | undefined>(
   undefined,
 )
 
+// Helper function to convert legacy habit history
+function convertLegacyHabitHistory(habit: any): any {
+  // Type guard: check if habit.history is an array of dates or strings (legacy)
+  if (
+    Array.isArray(habit.history) &&
+    (habit.history.length === 0 ||
+      habit.history[0] instanceof Date ||
+      typeof habit.history[0] === 'string')
+  ) {
+    const newHistory: Record<string, any> = {}
+
+    habit.history.forEach((date: Date | string) => {
+      const dateObj = date instanceof Date ? date : new Date(date)
+      const dateKey = dateObj.toISOString().split('T')[0]
+      newHistory[dateKey] = {
+        date: dateObj,
+        value: null, // Default value
+        completed: true, // If it was in history, it was completed
+      }
+    })
+
+    return {
+      ...habit,
+      target: habit.target ?? null, // Preserve target if exists, else null
+      history: newHistory,
+    }
+  }
+  return habit
+}
+
 export function CommitmentProvider({ children }: { children: ReactNode }) {
   const [commitments, setCommitments] = useState<Commitment[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -34,7 +64,6 @@ export function CommitmentProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     loadCommitments()
   }, [])
-
   const loadCommitments = () => {
     setIsLoading(true)
     setError(null)
@@ -66,14 +95,23 @@ export function CommitmentProvider({ children }: { children: ReactNode }) {
           throw new Error('Invalid commitments data format')
         }
 
-        const validated: Commitment[] = parsed.map((commitment) => ({
-          ...commitment,
-          subItems: {
+        // Convert and validate each commitment
+        const validated: Commitment[] = parsed.map((commitment) => {
+          // Ensure subItems exist with all required arrays
+          const subItems = {
             tasks: commitment.subItems?.tasks || [],
             habits: commitment.subItems?.habits || [],
             events: commitment.subItems?.events || [],
-          },
-        }))
+          }
+
+          // Handle backward compatibility for habits
+          subItems.habits = subItems.habits.map(convertLegacyHabitHistory)
+
+          return {
+            ...commitment,
+            subItems,
+          }
+        })
 
         setCommitments(validated)
       }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useCommitments } from '~/lib/contexts/CommitmentContext'
+import type { HabitTarget } from '~/lib/types'
 import { useModal } from '~/components/ui'
 import type { Commitment, Task, Habit, Note } from '~/lib/types'
 
@@ -188,11 +189,61 @@ export function useCommitmentDetail(id: string | undefined) {
       '',
     )
 
+    // Get target type
+    const targetTypeOptions = [
+      { value: 'none', label: 'None (simple completion)' },
+      { value: 'number', label: 'Number (e.g., minutes, repetitions)' },
+      { value: 'checklist', label: 'Checklist (multiple items)' },
+    ]
+
+    const targetType = await showDropdownModal(
+      'What type of target do you want to set?',
+      targetTypeOptions,
+      'none',
+    )
+
+    if (!targetType) return
+
+    // Initialize target based on selected type
+    let target: HabitTarget = null
+
+    if (targetType === 'number') {
+      const numberTarget = await showTextModal(
+        'Enter your target number:',
+        'Target (number)',
+        '1',
+      )
+      if (numberTarget) {
+        target = Number(numberTarget)
+      }
+    } else if (targetType === 'checklist') {
+      let items: string[] = []
+      let addingItems = true
+
+      while (addingItems) {
+        const item = await showTextModal(
+          'Add checklist item (Cancel to finish):',
+          'Checklist item',
+        )
+
+        if (item) {
+          items.push(item)
+        } else {
+          addingItems = false
+        }
+      }
+
+      if (items.length > 0) {
+        target = items
+      }
+    }
+
     const newHabit: Habit = {
       id: `habit-${Date.now()}`,
       title: newHabitTitle,
       schedule: schedule as 'daily' | 'weekly' | 'monthly',
-      history: [],
+      target: target,
+      history: {}, // Empty history record
       startOn: new Date(startDateStr),
       endOn: endDateStr ? new Date(endDateStr) : null,
     }
@@ -258,6 +309,86 @@ export function useCommitmentDetail(id: string | undefined) {
       currentEndDate,
     )
 
+    // Handle editing target value while maintaining target type
+    let updatedTarget = habit.target
+
+    // Determine the target type based on existing target
+    if (typeof habit.target === 'number') {
+      const numberTarget = await showTextModal(
+        'Edit your target number:',
+        'Target (number)',
+        habit.target.toString(),
+      )
+      if (numberTarget) {
+        updatedTarget = Number(numberTarget)
+      }
+    } else if (Array.isArray(habit.target)) {
+      // Edit checklist items
+      let items = [...habit.target]
+
+      // Show current items and option to add/remove
+      const editOption = await showDropdownModal(
+        'Edit checklist:',
+        [
+          { value: 'keep', label: 'Keep current items' },
+          { value: 'edit', label: 'Edit items' },
+        ],
+        'keep',
+      )
+
+      if (editOption === 'edit') {
+        // First show current items
+        let message = 'Current items:\n'
+        items.forEach((item, index) => {
+          message += `${index + 1}. ${item}\n`
+        })
+        await showTextModal(message, 'Current checklist', '')
+
+        // Then handle editing
+        let editingItems = true
+        while (editingItems) {
+          const action = await showDropdownModal(
+            'Checklist actions:',
+            [
+              { value: 'add', label: 'Add new item' },
+              { value: 'remove', label: 'Remove an item' },
+              { value: 'done', label: 'Finish editing' },
+            ],
+            'add',
+          )
+
+          if (action === 'add') {
+            const newItem = await showTextModal(
+              'Add checklist item:',
+              'New item',
+            )
+            if (newItem) {
+              items.push(newItem)
+            }
+          } else if (action === 'remove' && items.length > 0) {
+            const options = items.map((item, index) => ({
+              value: index.toString(),
+              label: item,
+            }))
+
+            const indexToRemove = await showDropdownModal(
+              'Select item to remove:',
+              options,
+              '0',
+            )
+
+            if (indexToRemove !== null) {
+              items.splice(Number(indexToRemove), 1)
+            }
+          } else if (action === 'done' || action === null) {
+            editingItems = false
+          }
+        }
+
+        updatedTarget = items
+      }
+    }
+
     const updatedHabits = commitment.subItems.habits.map((h) =>
       h.id === habitId
         ? {
@@ -266,6 +397,7 @@ export function useCommitmentDetail(id: string | undefined) {
             schedule: schedule as 'daily' | 'weekly' | 'monthly',
             startOn: new Date(startDateStr),
             endOn: endDateStr ? new Date(endDateStr) : null,
+            target: updatedTarget,
           }
         : h,
     )
@@ -301,28 +433,50 @@ export function useCommitmentDetail(id: string | undefined) {
     setCommitment(updatedCommitment)
   }
 
-  const handleHabitToggle = (habitId: string, date: Date) => {
+  const handleHabitToggle = (
+    habitId: string,
+    date: Date,
+    value?: HabitTarget,
+  ) => {
     if (!commitment) return
 
     const habit = commitment.subItems.habits.find((h) => h.id === habitId)
     if (!habit) return
 
-    // Create a copy of the history array
-    const updatedHistory = [...habit.history]
+    // Create a copy of the history record
+    const updatedHistory = { ...habit.history }
 
-    // Format the date to compare with other dates in history (YYYY-MM-DD format)
+    // Format the date to use as key (YYYY-MM-DD format)
     const dateStr = date.toISOString().split('T')[0]
 
     // Check if this date is already in the history
-    const existingIndex = updatedHistory.findIndex(
-      (d) => new Date(d).toISOString().split('T')[0] === dateStr,
-    )
-
-    // If it exists, remove it; otherwise add it
-    if (existingIndex >= 0) {
-      updatedHistory.splice(existingIndex, 1)
+    if (updatedHistory[dateStr]) {
+      // If it exists, remove it
+      delete updatedHistory[dateStr]
     } else {
-      updatedHistory.push(date)
+      // Determine the appropriate value based on habit target type
+      let habitValue: HabitTarget = null
+
+      if (value !== undefined) {
+        // If a value was explicitly provided, use it
+        habitValue = value
+      } else {
+        // Otherwise use the habit's target value based on its type
+        if (typeof habit.target === 'number') {
+          habitValue = habit.target
+        } else if (Array.isArray(habit.target)) {
+          habitValue = [...habit.target] // Use a copy of the checklist
+        } else {
+          habitValue = null // Default is null for simple completion
+        }
+      }
+
+      // Add the entry as completed
+      updatedHistory[dateStr] = {
+        date: date,
+        value: habitValue,
+        completed: true,
+      }
     }
 
     const updatedHabits = commitment.subItems.habits.map((h) =>

@@ -8,11 +8,18 @@ export function useHabitTracking(habits: Habit[]) {
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
     return habits.filter((habit) => {
-      if (habit.history.length === 0) return false
+      const historyEntries = Object.values(habit.history)
+      if (historyEntries.length === 0) return false
 
       // Check if the most recent history entry is within the last 30 days
+      const dates = historyEntries
+        .filter((entry) => entry.completed)
+        .map((entry) => new Date(entry.date))
+
+      if (dates.length === 0) return false
+
       const mostRecent = new Date(
-        Math.max(...habit.history.map((date) => new Date(date).getTime())),
+        Math.max(...dates.map((date) => date.getTime())),
       )
 
       return mostRecent >= thirtyDaysAgo
@@ -21,12 +28,14 @@ export function useHabitTracking(habits: Habit[]) {
 
   // Calculate streak for daily habits (consecutive days)
   const calculateStreak = (habit: Habit): number => {
-    if (habit.schedule !== 'daily' || habit.history.length === 0) return 0
+    if (habit.schedule !== 'daily' || Object.keys(habit.history).length === 0)
+      return 0
 
-    // Sort history dates in descending order
-    const sortedDates = [...habit.history]
-      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
-      .map((date) => new Date(date))
+    // Get all completed entries and sort dates in descending order
+    const sortedDates = Object.values(habit.history)
+      .filter((entry) => entry.completed)
+      .map((entry) => new Date(entry.date))
+      .sort((a, b) => b.getTime() - a.getTime())
 
     let streak = 1
     const today = new Date()

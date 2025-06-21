@@ -5,13 +5,22 @@ export interface Task {
   completed: boolean
 }
 
-export interface Habit {
+export type HabitTarget = number | string[] | null
+
+export interface Habit<Target = HabitTarget> {
   id: string
   title: string
   schedule: 'daily' | 'weekly' | 'monthly'
-  history: Date[]
+  target?: Target
+  history: Record<string, HabitHistoryEntry<Target>>
   startOn: Date
   endOn?: Date | null
+}
+
+export interface HabitHistoryEntry<Target = HabitTarget> {
+  date: Date
+  value: Target
+  completed: boolean
 }
 
 export interface Note {

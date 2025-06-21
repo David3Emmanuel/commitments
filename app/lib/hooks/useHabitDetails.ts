@@ -1,18 +1,19 @@
 import { useState, useEffect } from 'react'
 import { useCommitments } from '~/lib/contexts/CommitmentContext'
 import { useDate } from '~/lib/hooks/useDate'
-import type { Habit, Commitment } from '~/lib/types'
+import type { Habit, Commitment, HabitTarget } from '~/lib/types'
 
 interface HabitDetails {
   habit: Habit | null
   commitment: Commitment | null
   isLoading: boolean
   error: string | null
-  toggleHabit: (date: Date) => void
+  toggleHabit: (date: Date, value?: HabitTarget) => void
   isCompletedForDate: (date: Date) => boolean
   calculateStreak: () => number
   canToggleDate: (date: Date) => boolean
   isHabitActive: () => boolean
+  getValueForDate: (date: Date) => HabitTarget | undefined
 }
 
 type HabitInput = string | Habit
@@ -78,22 +79,47 @@ export function useHabitDetails(habitInput: HabitInput): HabitDetails {
     }
   }, [habitInput, commitments, isLoading])
 
-  const toggleHabit = (date: Date) => {
+  const toggleHabit = (date: Date, value?: HabitTarget) => {
     if (!habit || !parentCommitment) return
 
-    // Create a copy of the history array
-    const updatedHistory = [...habit.history]
+    // Create a copy of the history record
+    const updatedHistory = { ...habit.history }
 
-    // Check if this date is already in the history using isSameDay to respect user's day start setting
-    const existingIndex = updatedHistory.findIndex((d) =>
-      isSameDay(new Date(d), date),
+    // Format the date to use as key (YYYY-MM-DD format)
+    const dateStr = date.toISOString().split('T')[0]
+
+    // Check if this date exists in the history
+    const existingEntry = Object.entries(updatedHistory).find(([key, entry]) =>
+      isSameDay(new Date(entry.date), date),
     )
 
-    // If it exists, remove it; otherwise add it
-    if (existingIndex >= 0) {
-      updatedHistory.splice(existingIndex, 1)
+    if (existingEntry) {
+      // If it exists, remove it
+      delete updatedHistory[existingEntry[0]]
     } else {
-      updatedHistory.push(date)
+      // Determine the appropriate value based on habit target type
+      let habitValue: HabitTarget = null
+
+      if (value !== undefined) {
+        // If a value was explicitly provided, use it
+        habitValue = value
+      } else {
+        // Otherwise use the habit's target value based on its type
+        if (typeof habit.target === 'number') {
+          habitValue = habit.target
+        } else if (Array.isArray(habit.target)) {
+          habitValue = [...habit.target] // Use a copy of the checklist
+        } else {
+          habitValue = null // Default is null for simple completion
+        }
+      }
+
+      // Add the entry as completed
+      updatedHistory[dateStr] = {
+        date,
+        value: habitValue,
+        completed: true,
+      }
     }
 
     const updatedHabit = {
@@ -115,11 +141,14 @@ export function useHabitDetails(habitInput: HabitInput): HabitDetails {
     setHabit(updatedHabit)
     setParentCommitment(updatedCommitment)
   }
+
   const isCompletedForDate = (date: Date): boolean => {
     if (!habit) return false
 
     // Use isSameDay to respect user's day start hour setting
-    return habit.history.some((d) => isSameDay(new Date(d), date))
+    return Object.values(habit.history).some(
+      (entry) => isSameDay(new Date(entry.date), date) && entry.completed,
+    )
   }
 
   const canToggleDate = (date: Date): boolean => {
@@ -130,13 +159,18 @@ export function useHabitDetails(habitInput: HabitInput): HabitDetails {
   }
 
   const calculateStreak = (): number => {
-    if (!habit || habit.schedule !== 'daily' || habit.history.length === 0)
+    if (
+      !habit ||
+      habit.schedule !== 'daily' ||
+      Object.keys(habit.history).length === 0
+    )
       return 0
 
-    // Sort history dates in descending order
-    const sortedDates = [...habit.history]
-      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
-      .map((date) => new Date(date))
+    // Get all completed entries and sort dates in descending order
+    const sortedDates = Object.values(habit.history)
+      .filter((entry) => entry.completed)
+      .map((entry) => new Date(entry.date))
+      .sort((a, b) => b.getTime() - a.getTime())
 
     let streak = 1
     const today = getStartOfDay() // Use getStartOfDay to respect user's day start setting
@@ -192,6 +226,20 @@ export function useHabitDetails(habitInput: HabitInput): HabitDetails {
     return hasStarted && !hasEnded
   }
 
+  const getValueForDate = (date: Date): HabitTarget | undefined => {
+    if (!habit) return undefined
+
+    // Find entry for the given date
+    const entry = Object.values(habit.history).find((entry) =>
+      isSameDay(new Date(entry.date), date),
+    )
+
+    if (!entry) return undefined
+
+    // Return the appropriate value based on type
+    return entry.value
+  }
+
   return {
     habit,
     commitment: parentCommitment,
@@ -202,5 +250,6 @@ export function useHabitDetails(habitInput: HabitInput): HabitDetails {
     calculateStreak,
     canToggleDate,
     isHabitActive,
+    getValueForDate,
   }
 }

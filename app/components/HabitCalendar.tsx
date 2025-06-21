@@ -1,5 +1,7 @@
 import React from 'react'
 import { useDate } from '~/lib/hooks/useDate'
+import { useModal } from '~/components/ui/Modal'
+import type { HabitTarget } from '~/lib/types'
 
 interface CalendarDay {
   date: Date
@@ -9,17 +11,22 @@ interface CalendarDay {
 
 interface HabitCalendarProps {
   isCompletedForDate: (date: Date) => boolean
-  toggleHabit: (date: Date) => void
+  toggleHabit: (date: Date, value?: HabitTarget) => void
   canToggleDate: (date: Date) => boolean
+  getValueForDate?: (date: Date) => HabitTarget | undefined
+  habitTarget?: HabitTarget
 }
 
 export function HabitCalendar({
   isCompletedForDate,
   toggleHabit,
   canToggleDate,
+  getValueForDate,
+  habitTarget,
 }: HabitCalendarProps) {
   const { getNow, isSameDay } = useDate()
   const [currentMonth, setCurrentMonth] = React.useState(new Date())
+  const modal = useModal()
 
   const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
   const today = getNow()
@@ -103,6 +110,56 @@ export function HabitCalendar({
     setCurrentMonth(new Date(today.getFullYear(), today.getMonth(), 1))
   }
 
+  // Handle clicking on a calendar day
+  const handleDayClick = async (date: Date) => {
+    // If target is null or undefined, simple toggle
+    if (habitTarget === null || habitTarget === undefined) {
+      toggleHabit(date)
+      return
+    }
+
+    // For numeric targets
+    if (typeof habitTarget === 'number') {
+      const value = await modal.showTextModal(
+        'Enter value for this day:',
+        'Value',
+        habitTarget.toString(),
+      )
+
+      if (value) {
+        const numValue = parseFloat(value)
+        if (!isNaN(numValue)) {
+          toggleHabit(date, numValue)
+        }
+      }
+    }
+    // For string array targets
+    else if (Array.isArray(habitTarget)) {
+      const options = habitTarget.map((item) => ({
+        value: item,
+        label: item,
+      }))
+
+      const selectedValue = await modal.showDropdownModal(
+        'Select value for this day:',
+        options,
+        habitTarget[0],
+      )
+
+      if (selectedValue) {
+        toggleHabit(date, [selectedValue])
+      }
+    }
+  }
+
+  // Format habit value for display
+  const formatHabitValue = (value: HabitTarget | undefined): string => {
+    if (value === undefined || value === null) return '✓'
+    if (typeof value === 'number') return value.toString()
+    if (Array.isArray(value)) return value.join(', ')
+    return '✓'
+  }
+
   const monthName = currentMonth.toLocaleString('default', { month: 'long' })
   const year = currentMonth.getFullYear()
 
@@ -182,10 +239,10 @@ export function HabitCalendar({
           return (
             <button
               key={index}
-              onClick={canToggle ? () => toggleHabit(day.date) : undefined}
+              onClick={canToggle ? () => handleDayClick(day.date) : undefined}
               disabled={!canToggle}
               className={`
-                aspect-square flex items-center justify-center rounded-full text-sm p-1
+                aspect-square flex flex-col items-center justify-center rounded-full text-sm p-1
                 ${
                   canToggle
                     ? 'transition-all transform hover:scale-110'
@@ -212,7 +269,12 @@ export function HabitCalendar({
                 }
               `}
             >
-              {day.date.getDate()}
+              <span>{day.date.getDate()}</span>
+              {isCompletedForDate(day.date) && getValueForDate && (
+                <span className='text-xs mt-1'>
+                  {formatHabitValue(getValueForDate(day.date))}
+                </span>
+              )}
             </button>
           )
         })}

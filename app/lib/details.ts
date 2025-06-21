@@ -158,13 +158,14 @@ export const getNextHabitDate = (habit: Habit, fromDate: Date): Date | null => {
   }
 
   // Habit always has a schedule, so no need to check for its existence
-
-  // Convert history dates to start of day for comparison
-  const completedDates = habit.history.map((date) => {
-    const d = new Date(date)
-    d.setHours(0, 0, 0, 0)
-    return d.getTime()
-  })
+  // Convert history entries to start of day timestamps for comparison
+  const completedDates = Object.values(habit.history)
+    .filter((entry) => entry.completed)
+    .map((entry) => {
+      const d = new Date(entry.date)
+      d.setHours(0, 0, 0, 0)
+      return d.getTime()
+    })
 
   const isCompletedToday = completedDates.includes(today.getTime())
 
@@ -193,10 +194,12 @@ export const getNextHabitDate = (habit: Habit, fromDate: Date): Date | null => {
       startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay()) // Sunday is 0
       startOfWeek.setHours(0, 0, 0, 0)
 
-      const hasCompletedThisWeek = habit.history.some((date) => {
-        const d = new Date(date)
-        return d >= startOfWeek && d <= today
-      })
+      const hasCompletedThisWeek = Object.values(habit.history).some(
+        (entry) => {
+          const d = new Date(entry.date)
+          return entry.completed && d >= startOfWeek && d <= today
+        },
+      )
 
       if (!hasCompletedThisWeek) {
         return nextDate
@@ -216,10 +219,12 @@ export const getNextHabitDate = (habit: Habit, fromDate: Date): Date | null => {
       // If not completed in the current month, it's due today
       const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
 
-      const hasCompletedThisMonth = habit.history.some((date) => {
-        const d = new Date(date)
-        return d >= startOfMonth && d <= today
-      })
+      const hasCompletedThisMonth = Object.values(habit.history).some(
+        (entry) => {
+          const d = new Date(entry.date)
+          return entry.completed && d >= startOfMonth && d <= today
+        },
+      )
 
       if (!hasCompletedThisMonth) {
         return nextDate

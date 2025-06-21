@@ -158,14 +158,23 @@ export function useReviewProcess(commitmentId: string) {
     const updatedTasks = commitment.subItems.tasks.map((task) => ({
       ...task,
       completed: taskCompletionStatus[task.id] || false,
-    }))
-
-    // Update habit histories with check-ins
+    })) // Update habit histories with check-ins
     const updatedHabits = commitment.subItems.habits.map((habit) => {
       if (habitCheckIns[habit.id]) {
+        const today = new Date()
+        const dateStr = today.toISOString().split('T')[0]
+
+        // Create a new history entry for today
         return {
           ...habit,
-          history: [...habit.history, new Date()],
+          history: {
+            ...habit.history,
+            [dateStr]: {
+              date: today,
+              value: habit.target || null,
+              completed: true,
+            },
+          },
         }
       }
       return habit

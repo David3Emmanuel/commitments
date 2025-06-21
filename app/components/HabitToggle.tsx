@@ -1,22 +1,28 @@
 import { useHabitDetails } from '~/lib/hooks/useHabitDetails'
 import { useDate } from '~/lib/hooks/useDate'
-import type { Habit } from '~/lib/types'
+import { useState } from 'react'
+import type { Habit, HabitTarget } from '~/lib/types'
+import { useModal } from '~/components/ui/Modal'
+import { TextInput } from '~/components/ui'
 
 export function HabitToggle({
   habit,
   onToggle,
 }: {
   habit: Habit
-  onToggle: (habitId: string, date: Date) => void
+  onToggle: (habitId: string, date: Date, value?: HabitTarget) => void
 }) {
   const { getNow, isSameDay } = useDate()
-  const { isHabitActive } = useHabitDetails(habit)
+  const { isHabitActive, getValueForDate } = useHabitDetails(habit)
+  const modal = useModal()
   const today = getNow()
-
   // Check if habit was tracked today, respecting user's day start hour setting
-  const isTrackedToday = habit.history.some((date) => {
-    return isSameDay(new Date(date), today)
+  const isTrackedToday = Object.values(habit.history).some((entry) => {
+    return entry.completed && isSameDay(new Date(entry.date), today)
   })
+
+  // Get current value for today if it exists
+  const todayValue = getValueForDate(today)
 
   // If habit is not active, return a disabled button
   if (!isHabitActive()) {
@@ -44,10 +50,55 @@ export function HabitToggle({
       </button>
     )
   }
+  // Handle different target types when clicking
+  const handleToggle = async () => {
+    // If already tracked, just toggle off (which is the default behavior)
+    if (isTrackedToday) {
+      onToggle(habit.id, today)
+      return
+    }
+
+    // Handle different target types
+    if (habit.target === null) {
+      // Simple toggle for habits without targets
+      onToggle(habit.id, today)
+      return
+    } else if (typeof habit.target === 'number') {
+      // For numeric targets, prompt for a value
+      const value = await modal.showTextModal(
+        'Enter value for this habit:',
+        'Value',
+        habit.target.toString(),
+      )
+
+      if (value) {
+        const numValue = parseFloat(value)
+        if (!isNaN(numValue)) {
+          onToggle(habit.id, today, numValue)
+        }
+      }
+    } else if (Array.isArray(habit.target)) {
+      // For string array targets, show options
+      const options = habit.target.map((item) => ({
+        value: item,
+        label: item,
+      }))
+
+      const selectedValue = await modal.showDropdownModal(
+        'Select value for this habit:',
+        options,
+        habit.target[0],
+      )
+
+      if (selectedValue) {
+        onToggle(habit.id, today, [selectedValue])
+      }
+    }
+  }
 
   return (
     <button
-      onClick={() => onToggle(habit.id, today)}
+      onClick={handleToggle}
       className={`relative flex h-8 w-8 items-center justify-center rounded-full transition-all duration-300
         ${
           isTrackedToday
