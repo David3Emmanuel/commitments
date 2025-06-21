@@ -13,7 +13,7 @@ interface HabitDetails {
   calculateStreak: () => number
   canToggleDate: (date: Date) => boolean
   isHabitActive: () => boolean
-  getValueForDate: (date: Date) => HabitTarget | undefined
+  getValueForDate: (date: Date) => HabitTarget
 }
 
 type HabitInput = string | Habit
@@ -287,15 +287,15 @@ export function useHabitDetails(habitInput: HabitInput): HabitDetails {
     return hasStarted && !hasEnded
   }
 
-  const getValueForDate = (date: Date): HabitTarget | undefined => {
-    if (!habit) return undefined
+  const getValueForDate = (date: Date): HabitTarget => {
+    if (!habit) return null
 
     // Find entry for the given date
     const entry = Object.values(habit.history).find((entry) =>
       isSameDay(new Date(entry.date), date),
     )
 
-    if (!entry) return undefined
+    if (!entry) return null
 
     // Return the appropriate value based on type
     return entry.value

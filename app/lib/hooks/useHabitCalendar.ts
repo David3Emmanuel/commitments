@@ -2,12 +2,7 @@ import { useState } from 'react'
 import { useDate } from './useDate'
 import { useModal } from '~/components/modal-ui'
 import type { HabitTarget } from '~/lib/types'
-
-interface CalendarDay {
-  date: Date
-  isCurrentMonth: boolean
-  isToday: boolean
-}
+import type { ICalendarDay } from '~/components/CalendarDay'
 
 interface UseHabitCalendarProps {
   toggleHabit: (date: Date, value?: HabitTarget) => void
@@ -17,7 +12,7 @@ interface UseHabitCalendarProps {
 interface UseHabitCalendarResult {
   currentMonth: Date
   daysOfWeek: string[]
-  calendarDays: CalendarDay[]
+  calendarDays: ICalendarDay[]
   handleDayClick: (date: Date) => Promise<void>
   goToPreviousMonth: () => void
   goToNextMonth: () => void
@@ -39,7 +34,7 @@ export function useHabitCalendar({
   const today = getNow()
 
   // Generate all days for the current month view
-  const generateCalendarDays = (): CalendarDay[] => {
+  const generateCalendarDays = (): ICalendarDay[] => {
     const year = currentMonth.getFullYear()
     const month = currentMonth.getMonth()
 
@@ -56,7 +51,7 @@ export function useHabitCalendar({
     const previousMonth = new Date(year, month, 0)
     const daysInPreviousMonth = previousMonth.getDate()
 
-    const days: CalendarDay[] = []
+    const days: ICalendarDay[] = []
 
     // Add days from previous month
     for (
@@ -184,4 +179,4 @@ export function useHabitCalendar({
 }
 
 // Export the type for reuse
-export type { CalendarDay }
+export type { ICalendarDay as CalendarDay }
