@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useCommitments } from '~/lib/contexts/CommitmentContext'
 import type { HabitTarget } from '~/lib/types'
-import { useModal } from '~/components/ui'
+import { useModal } from '~/components/modal-ui'
 import type { Commitment, Task, Habit, Note } from '~/lib/types'
 
 export function useCommitmentDetail(id: string | undefined) {

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import type { Event } from '~/lib/types'
-import { Button, Modal, TextInput, TextArea, Select } from './ui'
+import { Button, TextInput, TextArea, Select } from './ui'
+import { Modal } from './modal-ui'
 
 interface EventFormProps {
   event?: Event

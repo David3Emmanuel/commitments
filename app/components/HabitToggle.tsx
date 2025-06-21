@@ -2,7 +2,7 @@ import { useHabitDetails } from '~/lib/hooks/useHabitDetails'
 import { useDate } from '~/lib/hooks/useDate'
 import { useState } from 'react'
 import type { Habit, HabitTarget } from '~/lib/types'
-import { useModal } from '~/components/ui/Modal'
+import { useModal } from '~/components/modal-ui'
 import { TextInput } from '~/components/ui'
 
 export function HabitToggle({

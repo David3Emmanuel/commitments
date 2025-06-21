@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useCommitments } from '~/lib/contexts/CommitmentContext'
 import { useSettings } from '~/lib/contexts/SettingsContext'
-import { useModal } from '~/components/ui/Modal'
+import { useModal } from '~/components/modal-ui'
 
 /**
  * Hook for importing and exporting application data (commitments and settings)

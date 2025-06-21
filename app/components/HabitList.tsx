@@ -1,7 +1,7 @@
 import type { Habit, HabitTarget } from '~/lib/types'
 import { Link } from 'react-router'
 import { Badge, Button } from '~/components/ui'
-import { useModal } from '~/components/ui/Modal'
+import { useModal } from '~/components/modal-ui'
 import { HabitToggle } from '~/components/HabitToggle'
 import useSort from '~/lib/hooks/useSort'
 import { useHabitDetails } from '~/lib/hooks/useHabitDetails'

@@ -1,5 +1,5 @@
 import type { Task } from '~/lib/types'
-import { useModal } from '~/components/ui/Modal'
+import { useModal } from '~/components/modal-ui'
 
 interface TasksReviewProps {
   tasks: Task[]

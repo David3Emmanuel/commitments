@@ -1,6 +1,6 @@
 import React from 'react'
 import { useDate } from '~/lib/hooks/useDate'
-import { useModal } from '~/components/ui/Modal'
+import { useModal } from '~/components/modal-ui'
 import type { HabitTarget } from '~/lib/types'
 
 interface CalendarDay {

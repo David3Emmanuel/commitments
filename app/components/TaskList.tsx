@@ -1,6 +1,6 @@
 import type { Task } from '~/lib/types'
 import { Checkbox, Button } from '~/components/ui'
-import { useModal } from '~/components/ui/Modal'
+import { useModal } from '~/components/modal-ui'
 import useSort from '~/lib/hooks/useSort'
 
 interface TaskListProps {

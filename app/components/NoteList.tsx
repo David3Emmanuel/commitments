@@ -1,6 +1,6 @@
 import type { Note } from '~/lib/types'
 import { Button } from '~/components/ui'
-import { useModal } from '~/components/ui/Modal'
+import { useModal } from '~/components/modal-ui'
 
 interface NoteListProps {
   notes: Note[]

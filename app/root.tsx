@@ -10,7 +10,7 @@ import type { Route } from './+types/root'
 import { CommitmentProvider } from './lib/contexts/CommitmentContext'
 import { SettingsProvider } from './lib/contexts/SettingsContext'
 import { ToastProvider } from './components/ui/Toast'
-import { ModalProvider } from './components/ui/Modal'
+import { ModalProvider } from './components/modal-ui'
 import './app.css'
 import { useRegisterSW } from './lib/hooks/useRegisterSW'
 

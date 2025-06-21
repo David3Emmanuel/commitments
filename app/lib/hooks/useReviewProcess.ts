@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router'
 import { useCommitments } from '~/lib/contexts/CommitmentContext'
 import type { Commitment, Task, Habit } from '~/lib/types'
-import { useModal } from '~/components/ui/Modal'
+import { useModal } from '~/components/modal-ui'
 
 type ReviewStep = 'tasks' | 'habits' | 'notes' | 'complete'
 
